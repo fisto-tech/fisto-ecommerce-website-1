@@ -181,17 +181,17 @@ function ProductsContent() {
                   {products.map((p) => {
                     const price = p.discountPrice || p.price;
                     return (
-                      <div key={p.id} className="flex gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
-                        <div className="h-28 w-28 sm:h-36 sm:w-36 shrink-0 relative rounded-lg overflow-hidden border bg-muted">
+                      <div key={p.id} className="flex flex-col sm:flex-row gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
+                        <div className="h-48 sm:h-36 w-full sm:w-36 shrink-0 relative rounded-lg overflow-hidden border bg-muted">
                           <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
                         </div>
-                        <div className="flex-1 flex flex-col justify-between py-1">
+                        <div className="flex-1 flex flex-col justify-between py-1 space-y-3 sm:space-y-0">
                           <div className="space-y-1">
                             <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{p.brandName}</span>
                             <h3 className="text-base font-semibold text-foreground">{p.name}</h3>
                             <p className="text-base text-muted-foreground line-clamp-2 pr-4">{p.description}</p>
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between pt-2 sm:pt-0">
                             <div className="flex items-baseline gap-2">
                               <span className="text-base font-bold">{price}</span>
                               {p.discountPrice && <span className="text-base text-muted-foreground line-through">{p.price}</span>}
