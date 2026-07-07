@@ -255,6 +255,36 @@ export default function CartPage() {
                 ✓ Coupon Code active: {Math.round(discountRate * 100)}% Discount Applied.
               </p>
             )}
+
+            <div className="pt-3 border-t border-border/50 space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                Available Coupon Offers
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { code: "FISTO10", desc: "10% OFF Storewide" },
+                  { code: "SUMMER15", desc: "15% OFF Special" },
+                  { code: "WELCOME5", desc: "5% OFF First Order" }
+                ].map((promo) => (
+                  <button
+                    key={promo.code}
+                    onClick={() => {
+                      const res = applyDiscount(promo.code);
+                      if (res.success) {
+                        addToast(res.message, "success");
+                      } else {
+                        addToast(res.message, "error");
+                      }
+                    }}
+                    type="button"
+                    className="flex flex-col items-start p-2 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 text-left transition-colors cursor-pointer"
+                  >
+                    <span className="font-bold text-sm text-foreground">{promo.code}</span>
+                    <span className="text-[10px] text-muted-foreground font-medium">{promo.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

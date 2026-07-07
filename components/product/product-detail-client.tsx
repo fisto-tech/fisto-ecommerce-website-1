@@ -8,6 +8,7 @@ import { Product, Review } from "../../types";
 import { useCartStore } from "../../store/cart";
 import { useWishlistStore } from "../../store/wishlist";
 import { useRecentlyViewedStore } from "../../store/recentlyViewed";
+import { useAuthStore } from "../../store/auth";
 import { useToastStore } from "../../store/toast";
 import { ApiService } from "../../services/api";
 import { ProductGallery } from "./product-gallery";
@@ -70,6 +71,20 @@ export function ProductDetailClient({
   });
 
   const ratingValue = watch("rating");
+  const { user } = useAuthStore();
+
+  const averageRating = React.useMemo(() => {
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    return parseFloat((sum / reviews.length).toFixed(1));
+  }, [reviews]);
+
+  React.useEffect(() => {
+    if (user) {
+      const name = user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim();
+      setValue("userName", name);
+    }
+  }, [user, setValue]);
 
   // Track recently viewed product
   React.useEffect(() => {
@@ -134,7 +149,7 @@ export function ProductDetailClient({
               {product.name}
             </h1>
             <div className="flex items-center gap-3">
-              <Rating value={product.rating} count={reviews.length} size="md" />
+              <Rating value={averageRating} count={reviews.length} size="md" />
               <span className="text-base text-muted-foreground">|</span>
               <span className={`text-base font-semibold ${isOutOfStock ? "text-red-500" : "text-emerald-600"}`}>
                 {isOutOfStock ? "Out of Stock" : `In Stock (${product.stock} units remaining)`}
@@ -319,12 +334,12 @@ export function ProductDetailClient({
         <h2 className="text-lg font-bold tracking-tight text-foreground mb-6">Customer Reviews</h2>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Review Stats */}
+           {/* Review Stats */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="text-4xl font-extrabold text-foreground">{product.rating}</span>
+              <span className="text-4xl font-extrabold text-foreground">{averageRating}</span>
               <div>
-                <Rating value={product.rating} />
+                <Rating value={averageRating} />
                 <span className="text-base text-muted-foreground">Based on {reviews.length} reviews</span>
               </div>
             </div>

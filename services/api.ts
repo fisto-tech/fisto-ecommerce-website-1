@@ -1,6 +1,7 @@
 import { Product, Category, Brand, Review, Order } from "../types";
 import { mockProducts, mockCategories, mockBrands, mockReviews } from "../mock/data";
 import { useProductStore } from "../store/product";
+import { useReviewStore } from "../store/review";
 
 const LATENCY = 300; // Simulated latency in ms
 
@@ -107,7 +108,7 @@ export class ApiService {
   // --- Reviews ---
   static async getReviews(productId: string): Promise<Review[]> {
     await delay(LATENCY);
-    return mockReviews[productId] || [];
+    return useReviewStore.getState().reviews[productId] || [];
   }
 
   static async submitReview(
@@ -125,19 +126,19 @@ export class ApiService {
       verifiedPurchase: true,
     };
 
-    if (!mockReviews[productId]) {
-      mockReviews[productId] = [];
-    }
-    mockReviews[productId].unshift(newReview);
+    useReviewStore.getState().addReview(productId, newReview);
 
-    // Update product rating and reviews count
-    const product = mockProducts.find((p) => p.id === productId);
-    if (product) {
-      const currentReviews = mockReviews[productId];
-      const sum = currentReviews.reduce((acc, r) => acc + r.rating, 0);
-      product.rating = parseFloat((sum / currentReviews.length).toFixed(1));
-      product.reviewsCount = currentReviews.length;
-    }
+    // Calculate dynamic rating and count
+    const currentReviews = useReviewStore.getState().reviews[productId] || [];
+    const sum = currentReviews.reduce((acc, r) => acc + r.rating, 0);
+    const newRating = parseFloat((sum / currentReviews.length).toFixed(1));
+    const newReviewsCount = currentReviews.length;
+
+    // Update product rating persistently
+    useProductStore.getState().updateProduct(productId, {
+      rating: newRating,
+      reviewsCount: newReviewsCount,
+    });
 
     return newReview;
   }
