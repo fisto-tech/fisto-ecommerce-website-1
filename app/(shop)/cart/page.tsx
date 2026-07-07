@@ -16,7 +16,7 @@ export default function CartPage() {
   const [mounted, setMounted] = React.useState(false);
   const [promoInput, setPromoInput] = React.useState("");
 
-  const { items, discountCode, discountRate, updateQuantity, removeFromCart, applyDiscount, getTotals } =
+  const { items, discountCode, discountRate, updateQuantity, removeFromCart, applyDiscount, updateVariant, getTotals } =
     useCartStore();
   const { isAuthenticated } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
@@ -110,13 +110,56 @@ export default function CartPage() {
                               {item.product.name}
                             </h3>
                           </Link>
-                          {item.selectedColor || item.selectedSize ? (
-                            <p className="text-base text-muted-foreground mt-1">
-                              {item.selectedColor && `Color: ${item.selectedColor}`}
-                              {item.selectedColor && item.selectedSize && "  |  "}
-                              {item.selectedSize && `Size: ${item.selectedSize}`}
-                            </p>
-                          ) : null}
+                          {/* Variant Selectors */}
+                          {(() => {
+                            const colors = item.product.variants.filter((v) => v.type === "color").map((v) => v.value);
+                            const sizes = item.product.variants.filter((v) => v.type === "size").map((v) => v.value);
+                            
+                            if (colors.length === 0 && sizes.length === 0) return null;
+                            
+                            return (
+                              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
+                                {colors.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-muted-foreground font-medium">Color:</span>
+                                    <select
+                                      value={item.selectedColor}
+                                      onChange={(e) => {
+                                        updateVariant(item.product.id, item.selectedColor, item.selectedSize, e.target.value, item.selectedSize);
+                                        addToast("Color updated", "success");
+                                      }}
+                                      className="bg-muted border border-border/80 rounded px-1.5 py-0.5 text-foreground font-semibold focus:outline-none"
+                                    >
+                                      {colors.map((c) => (
+                                        <option key={c} value={c}>
+                                          {c}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+                                {sizes.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-muted-foreground font-medium">Size:</span>
+                                    <select
+                                      value={item.selectedSize}
+                                      onChange={(e) => {
+                                        updateVariant(item.product.id, item.selectedColor, item.selectedSize, item.selectedColor, e.target.value);
+                                        addToast("Size updated", "success");
+                                      }}
+                                      className="bg-muted border border-border/80 rounded px-1.5 py-0.5 text-foreground font-semibold focus:outline-none"
+                                    >
+                                      {sizes.map((s) => (
+                                        <option key={s} value={s}>
+                                          {s}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
                         <span className="text-sm font-bold text-foreground shrink-0">
                           {formatPrice(itemPrice)}

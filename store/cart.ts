@@ -11,6 +11,7 @@ interface CartState {
   removeFromCart: (productId: string, selectedColor?: string, selectedSize?: string) => void;
   updateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedSize?: string) => void;
   applyDiscount: (code: string) => { success: boolean; message: string };
+  updateVariant: (productId: string, oldColor?: string, oldSize?: string, newColor?: string, newSize?: string) => void;
   clearCart: () => void;
   getTotals: () => { subtotal: number; discount: number; tax: number; total: number };
 }
@@ -77,6 +78,41 @@ export const useCartStore = create<CartState>()(
           return { success: true, message: `Applied ${found.description}` };
         }
         return { success: false, message: "This coupon code is invalid or has expired." };
+      },
+
+      updateVariant: (productId, oldColor, oldSize, newColor, newSize) => {
+        const currentItems = get().items;
+        const targetIndex = currentItems.findIndex(
+          (item) =>
+            item.product.id === productId &&
+            item.selectedColor === oldColor &&
+            item.selectedSize === oldSize
+        );
+        if (targetIndex === -1) return;
+
+        const updatedItems = [...currentItems];
+        const targetItem = updatedItems[targetIndex];
+
+        // Check if item with new variants already exists
+        const duplicateIndex = currentItems.findIndex(
+          (item, idx) =>
+            idx !== targetIndex &&
+            item.product.id === productId &&
+            item.selectedColor === newColor &&
+            item.selectedSize === newSize
+        );
+
+        if (duplicateIndex > -1) {
+          updatedItems[duplicateIndex].quantity += targetItem.quantity;
+          updatedItems.splice(targetIndex, 1);
+        } else {
+          updatedItems[targetIndex] = {
+            ...targetItem,
+            selectedColor: newColor,
+            selectedSize: newSize,
+          };
+        }
+        set({ items: updatedItems });
       },
 
       clearCart: () => {

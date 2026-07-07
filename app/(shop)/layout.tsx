@@ -1,5 +1,7 @@
 import { Navbar } from "../../components/layout/navbar";
 import { Footer } from "../../components/layout/footer";
+import { CompareBar } from "../../components/product/compare-bar";
+import { QuickViewModal } from "../../components/product/quick-view-modal";
 import { Suspense } from "react";
 
 export default function ShopLayout({
@@ -16,6 +18,8 @@ export default function ShopLayout({
         {children}
       </main>
       <Footer />
+      <CompareBar />
+      <QuickViewModal />
     </div>
   );
 }

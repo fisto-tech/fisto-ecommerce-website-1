@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import { Product } from "../../types";
 import { useCartStore } from "../../store/cart";
@@ -11,6 +11,8 @@ import { useWishlistStore } from "../../store/wishlist";
 import { useToastStore } from "../../store/toast";
 import { Rating } from "./rating";
 import { formatPrice } from "../../lib/utils";
+import { useCompareStore } from "../../store/compare";
+import { useQuickViewStore } from "../../store/quickView";
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
   const addToast = useToastStore((state) => state.addToast);
+
+  const { compareItems, addToCompare, removeFromCompare } = useCompareStore();
+  const { openQuickView } = useQuickViewStore();
 
   // Prevent hydration mismatch: wishlist state is persisted in localStorage,
   // so it's unknown on the server. Only apply wishlist-dependent classes after mount.
@@ -49,6 +54,29 @@ export function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     toggleWishlist(product);
     addToast(inWishlist ? "Removed from wishlist" : "Added to wishlist", "success");
+  };
+
+  const isComparing = mounted && compareItems.some((p) => p.id === id);
+
+  const handleCompareToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    if (e.target.checked) {
+      const res = addToCompare(product);
+      if (!res.success) {
+        addToast(res.message, "error");
+      } else {
+        addToast(res.message, "success");
+      }
+    } else {
+      removeFromCompare(id);
+      addToast(`${name} removed from comparison`, "success");
+    }
+  };
+
+  const handleQuickViewClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openQuickView(product);
   };
 
   return (
@@ -82,20 +110,32 @@ export function ProductCard({ product }: ProductCardProps) {
           transition={{ duration: 0.3 }}
         />
 
-        {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
+        {/* Badges and Comparison */}
+        <div className="absolute left-3 top-3 flex flex-col gap-2.5 z-10">
+          <label
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm px-2 py-1 flex items-center gap-1.5 shadow-md border border-black/5 dark:border-white/10 cursor-pointer hover:scale-105 transition-transform"
+          >
+            <input
+              type="checkbox"
+              checked={isComparing}
+              onChange={handleCompareToggle}
+              className="h-3 w-3 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+            />
+            <span className="text-[8px] font-extrabold uppercase tracking-wider text-zinc-900 dark:text-white">Compare</span>
+          </label>
           {hasDiscount && (
-            <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-sm font-bold text-white uppercase tracking-wider shadow-md">
+            <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-md w-fit">
               {discountPercent}% OFF
             </span>
           )}
           {isLatest && (
-            <span className="rounded-full bg-sky-500 px-2.5 py-1 text-sm font-bold text-white uppercase tracking-wider shadow-md">
+            <span className="rounded-full bg-sky-500 px-2.5 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-md w-fit">
               New
             </span>
           )}
           {isBestSeller && (
-            <span className="rounded-full bg-amber-500 px-2.5 py-1 text-sm font-bold text-white uppercase tracking-wider shadow-md">
+            <span className="rounded-full bg-amber-500 px-2.5 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-md w-fit">
               Popular
             </span>
           )}
@@ -131,6 +171,16 @@ export function ProductCard({ product }: ProductCardProps) {
               inWishlist ? "fill-red-500 text-red-500" : "text-zinc-900 dark:text-white"
             }`}
           />
+        </motion.button>
+
+        {/* Quick View Eye Button */}
+        <motion.button
+          onClick={handleQuickViewClick}
+          className="absolute right-3 top-13 z-10 rounded-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-2 text-zinc-900 dark:text-white shadow-md hover:bg-white dark:hover:bg-zinc-800 hover:scale-110 transition-all cursor-pointer border border-black/5 dark:border-white/10"
+          aria-label="Quick View"
+          whileTap={{ scale: 0.85 }}
+        >
+          <Eye className="h-5 w-5" />
         </motion.button>
       </Link>
 

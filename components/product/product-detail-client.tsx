@@ -52,6 +52,7 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = React.useState(1);
   const [reviews, setReviews] = React.useState<Review[]>(initialReviews);
   const [activeTab, setActiveTab] = React.useState<"description" | "specifications">("description");
+  const [filterRating, setFilterRating] = React.useState<number | null>(null);
 
   // Colors and sizes derived from variants
   const colors = product.variants.filter((v) => v.type === "color").map((v) => v.value);
@@ -78,6 +79,11 @@ export function ProductDetailClient({
     const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
     return parseFloat((sum / reviews.length).toFixed(1));
   }, [reviews]);
+
+  const filteredReviews = React.useMemo(() => {
+    if (filterRating === null) return reviews;
+    return reviews.filter((r) => r.rating === filterRating);
+  }, [reviews, filterRating]);
 
   React.useEffect(() => {
     if (user) {
@@ -345,20 +351,30 @@ export function ProductDetailClient({
             </div>
 
             {/* Simulated bar chart percentages */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
+                Filter by rating (click below)
+              </span>
               {[5, 4, 3, 2, 1].map((stars) => {
                 const total = reviews.length || 1;
                 const starCount = reviews.filter((r) => r.rating === stars).length;
                 const percent = Math.round((starCount / total) * 100);
                 return (
-                  <div key={stars} className="flex items-center gap-3 text-sm">
+                  <button
+                    key={stars}
+                    type="button"
+                    onClick={() => setFilterRating(filterRating === stars ? null : stars)}
+                    className={`flex items-center gap-3 text-sm w-full p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-left border ${
+                      filterRating === stars ? "border-primary/40 bg-primary/5 font-bold" : "border-transparent"
+                    }`}
+                  >
                     <span className="w-3 text-right text-muted-foreground">{stars}</span>
                     <Star className="h-3 w-3 text-amber-400 fill-amber-400 shrink-0" />
                     <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
                       <div style={{ width: `${percent}%` }} className="h-full bg-amber-400 rounded-full" />
                     </div>
                     <span className="w-8 text-right text-muted-foreground">{percent}%</span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -421,11 +437,27 @@ export function ProductDetailClient({
 
           {/* Reviews Comments list */}
           <div className="lg:col-span-2 space-y-6">
-            {reviews.length === 0 ? (
-              <p className="text-base text-muted-foreground italic">No reviews yet. Be the first to share your thoughts!</p>
+            <div className="flex items-center justify-between pb-2 border-b border-border/50">
+              <h3 className="text-sm font-bold text-foreground">
+                {filterRating === null ? "All Reviews" : `Showing ${filterRating}-Star Reviews`}
+              </h3>
+              {filterRating !== null && (
+                <button
+                  onClick={() => setFilterRating(null)}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  Clear Filter
+                </button>
+              )}
+            </div>
+
+            {filteredReviews.length === 0 ? (
+              <p className="text-base text-muted-foreground italic py-6">
+                No reviews found {filterRating !== null ? `with a ${filterRating}-star rating` : ""}.
+              </p>
             ) : (
               <div className="divide-y divide-border/50 space-y-6">
-                {reviews.map((rev) => (
+                {filteredReviews.map((rev) => (
                   <div key={rev.id} className="pt-6 first:pt-0 space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-bold text-foreground">{rev.userName}</h4>
