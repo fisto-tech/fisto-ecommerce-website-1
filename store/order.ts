@@ -7,6 +7,7 @@ interface OrderState {
   addOrder: (order: Order) => void;
   updateOrderStatus: (orderId: string, status: Order["status"]) => void;
   requestRefund: (orderId: string) => { success: boolean; message: string };
+  cancelOrder: (orderId: string) => { success: boolean; message: string };
   clearOrders: () => void;
 }
 
@@ -47,6 +48,26 @@ export const useOrderStore = create<OrderState>()(
         }));
         
         return { success: true, message: "Refund requested successfully" };
+      },
+
+      cancelOrder: (orderId) => {
+        const order = get().orders.find((o) => o.id === orderId);
+        
+        if (!order) {
+          return { success: false, message: "Order not found" };
+        }
+        
+        if (order.status !== "pending" && order.status !== "processing") {
+          return { success: false, message: "Only pending or processing orders can be cancelled" };
+        }
+
+        set((state) => ({
+          orders: state.orders.map((o) =>
+            o.id === orderId ? { ...o, status: "cancelled" } : o
+          ),
+        }));
+        
+        return { success: true, message: "Order cancelled successfully" };
       },
 
       clearOrders: () => {

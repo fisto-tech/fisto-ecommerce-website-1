@@ -15,9 +15,9 @@ export default function OrdersPage() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
-
   const { orders } = useOrderStore();
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-6">
@@ -73,7 +73,7 @@ export default function OrdersPage() {
                         <span className={`rounded-full px-2 py-0.5 text-sm font-bold uppercase tracking-wider ${
                           ord.status === "delivered" ? "bg-emerald-500/10 text-emerald-600" : 
                           ord.status === "refund_requested" ? "bg-amber-500/10 text-amber-600" :
-                          ord.status === "refunded" ? "bg-red-500/10 text-red-600" :
+                          (ord.status === "refunded" || ord.status === "cancelled") ? "bg-red-500/10 text-red-600" :
                           "bg-blue-500/10 text-blue-600"
                         }`}>
                           {ord.status.replace("_", " ")}

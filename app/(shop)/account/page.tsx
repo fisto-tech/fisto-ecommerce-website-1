@@ -34,6 +34,7 @@ export default function AccountPage() {
   const [isEditing, setIsEditing] = React.useState(false);
 
   const { user, isAuthenticated, logout, updateProfile } = useAuthStore();
+  const { orders } = useOrderStore();
   const addToast = useToastStore((state) => state.addToast);
 
   // Sync react-hook-form
@@ -100,7 +101,6 @@ export default function AccountPage() {
     router.push("/");
   };
 
-  const { orders } = useOrderStore();
   const recentOrders = orders.slice(0, 3);
 
   return (

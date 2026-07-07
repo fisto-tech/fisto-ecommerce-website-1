@@ -19,10 +19,10 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
-
-  const { orders, requestRefund } = useOrderStore();
+  const { orders, requestRefund, cancelOrder } = useOrderStore();
   const { addToast } = useToastStore();
+
+  if (!mounted) return null;
   const order = orders.find((o) => o.id === id);
 
   if (!order) {
@@ -39,6 +39,15 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   const handleRefundRequest = () => {
     const result = requestRefund(id);
+    if (result.success) {
+      addToast(result.message, "success");
+    } else {
+      addToast(result.message, "error");
+    }
+  };
+
+  const handleCancelOrder = () => {
+    const result = cancelOrder(id);
     if (result.success) {
       addToast(result.message, "success");
     } else {
@@ -68,7 +77,13 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           </h1>
           <p className="text-base text-muted-foreground">Placed on {order.date}</p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-3">
+          {(order.status === "pending" || order.status === "processing") && (
+            <Button variant="outline" className="text-red-600 border-red-600/30 hover:bg-red-600/10" onClick={handleCancelOrder}>
+              <AlertCircle className="h-4 w-4 mr-2" />
+              Cancel Order
+            </Button>
+          )}
           {order.status === "delivered" && (
             <Button variant="outline" className="text-amber-600 border-amber-600/30 hover:bg-amber-600/10" onClick={handleRefundRequest}>
               <AlertCircle className="h-4 w-4 mr-2" />
@@ -83,7 +98,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         <div className="flex items-center justify-between text-base font-semibold pb-4 border-b">
           <span className="flex items-center gap-1.5">
             <Clock className="h-4 w-4 text-blue-500" />
-            Status: <span className={`font-bold uppercase ${order.status === "refund_requested" ? "text-amber-500" : order.status === "refunded" ? "text-red-500" : "text-blue-500"}`}>{order.status.replace("_", " ")}</span>
+            Status: <span className={`font-bold uppercase ${order.status === "refund_requested" ? "text-amber-500" : order.status === "refunded" || order.status === "cancelled" ? "text-red-500" : "text-blue-500"}`}>{order.status.replace("_", " ")}</span>
           </span>
           <span className="font-mono text-muted-foreground">Tracking #: {order.trackingNumber || "Pending"}</span>
         </div>
