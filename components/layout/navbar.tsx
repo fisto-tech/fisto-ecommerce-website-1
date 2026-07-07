@@ -56,8 +56,9 @@ export function Navbar() {
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = React.useState<"shop" | "brands" | null>(null);
 
-  // Sync search query from URL
+  const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
+    setMounted(true);
     setSearchQuery(searchParams.get("q") || "");
   }, [searchParams]);
 
@@ -246,7 +247,7 @@ export function Navbar() {
             aria-label="Wishlist"
           >
             <Heart className="h-6 w-6" />
-            {wishlistItems.length > 0 && (
+            {mounted && wishlistItems.length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                 {wishlistItems.length}
               </span>
@@ -260,7 +261,7 @@ export function Navbar() {
             aria-label="View Shopping Cart"
           >
             <ShoppingBag className="h-6 w-6" />
-            {cartCount > 0 && (
+            {mounted && cartCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground animate-scaleIn">
                 {cartCount}
               </span>
@@ -268,7 +269,7 @@ export function Navbar() {
           </Link>
 
           {/* User Account / Login */}
-          {isAuthenticated ? (
+          {mounted && isAuthenticated ? (
             <Link
               href="/account"
               className="rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
