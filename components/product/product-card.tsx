@@ -22,6 +22,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
   const addToast = useToastStore((state) => state.addToast);
 
+  // Prevent hydration mismatch: wishlist state is persisted in localStorage,
+  // so it's unknown on the server. Only apply wishlist-dependent classes after mount.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+
+  const inWishlist = mounted && isInWishlist;
+
   const { id, name, slug, price, discountPrice, rating, reviewsCount, images, brandName, isLatest, isBestSeller } = product;
 
   const currentPrice = discountPrice || price;
@@ -41,7 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     toggleWishlist(product);
-    addToast(isInWishlist ? "Removed from wishlist" : "Added to wishlist", "success");
+    addToast(inWishlist ? "Removed from wishlist" : "Added to wishlist", "success");
   };
 
   return (
@@ -116,12 +123,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <motion.button
           onClick={handleWishlistToggle}
           className="absolute right-3 top-3 z-10 rounded-full bg-white/90 backdrop-blur-sm p-2 text-foreground shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer"
-          aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
           whileTap={{ scale: 0.85 }}
         >
           <Heart
             className={`h-5 w-5 transition-all duration-200 ${
-              isInWishlist ? "fill-red-500 text-red-500" : "text-foreground"
+              inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
             }`}
           />
         </motion.button>
