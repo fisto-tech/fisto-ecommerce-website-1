@@ -43,7 +43,7 @@ export default function CheckoutPage() {
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
   
   const { items, getTotals, clearCart } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { addOrder } = useOrderStore();
   const { products, updateProduct } = useProductStore();
   const addToast = useToastStore((state) => state.addToast);
@@ -75,6 +75,12 @@ export default function CheckoutPage() {
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  React.useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push("/login?redirect=/checkout");
+    }
+  }, [mounted, isAuthenticated, router]);
 
   if (!mounted) {
     return (

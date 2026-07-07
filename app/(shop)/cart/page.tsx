@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "../../../store/cart";
 import { useToastStore } from "../../../store/toast";
+import { useAuthStore } from "../../../store/auth";
 import { formatPrice } from "../../../lib/utils";
 import { Button } from "../../../components/ui/button";
 import { Breadcrumb } from "../../../components/common/breadcrumb";
@@ -17,6 +18,7 @@ export default function CartPage() {
 
   const { items, discountCode, discountRate, updateQuantity, removeFromCart, applyDiscount, getTotals } =
     useCartStore();
+  const { isAuthenticated } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
 
   // Avoid hydration mismatch
@@ -212,7 +214,17 @@ export default function CartPage() {
               </div>
             </div>
 
-            <Button className="w-full mt-2 font-semibold h-11" onClick={() => router.push("/checkout")}>
+            <Button 
+              className="w-full mt-2 font-semibold h-11" 
+              onClick={() => {
+                if (isAuthenticated) {
+                  router.push("/checkout");
+                } else {
+                  addToast("Please sign in to proceed to checkout.", "info");
+                  router.push("/login?redirect=/checkout");
+                }
+              }}
+            >
               Proceed to Checkout
               <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>

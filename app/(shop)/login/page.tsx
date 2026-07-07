@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,10 +18,13 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const login = useAuthStore((state) => state.login);
   const addToast = useToastStore((state) => state.addToast);
+  
+  const redirectUrl = searchParams.get("redirect") || "/account";
 
   const {
     register,
@@ -37,7 +40,7 @@ export default function LoginPage() {
       const res = await login(data.email);
       if (res.success) {
         addToast(res.message, "success");
-        router.push("/account");
+        router.push(redirectUrl);
       } else {
         addToast(res.message, "error");
       }
@@ -103,5 +106,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="max-w-md mx-auto py-12 px-4 sm:px-6 lg:py-16 text-center">
+        <p className="text-muted-foreground animate-pulse">Loading login form...</p>
+      </div>
+    }>
+      <LoginForm />
+    </React.Suspense>
   );
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,10 +20,13 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const registerUser = useAuthStore((state) => state.register);
   const addToast = useToastStore((state) => state.addToast);
+  
+  const redirectUrl = searchParams.get("redirect") || "/account";
 
   const {
     register,
@@ -39,7 +42,7 @@ export default function RegisterPage() {
       const res = await registerUser(data.firstName, data.lastName, data.email);
       if (res.success) {
         addToast(res.message, "success");
-        router.push("/account");
+        router.push(redirectUrl);
       } else {
         addToast(res.message, "error");
       }
@@ -112,5 +115,17 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="max-w-md mx-auto py-12 px-4 sm:px-6 text-center">
+        <p className="text-muted-foreground animate-pulse">Loading registration form...</p>
+      </div>
+    }>
+      <RegisterForm />
+    </React.Suspense>
   );
 }
