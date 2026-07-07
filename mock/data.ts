@@ -5,7 +5,7 @@ export const mockCategories: Category[] = [
     id: "cat-1",
     name: "Audio & Sound",
     slug: "audio-sound",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop",
     description: "Premium headphones, earbuds, and home audio systems.",
     productsCount: 18,
   },
@@ -13,7 +13,7 @@ export const mockCategories: Category[] = [
     id: "cat-2",
     name: "Wearables",
     slug: "wearables",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop",
     description: "Smartwatches, fitness bands, and tracking devices.",
     productsCount: 12,
   },
@@ -21,7 +21,7 @@ export const mockCategories: Category[] = [
     id: "cat-3",
     name: "Computer Gear",
     slug: "computer-gear",
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop",
     description: "Ergonomic keyboards, precision mice, and desktop stands.",
     productsCount: 24,
   },
@@ -29,7 +29,7 @@ export const mockCategories: Category[] = [
     id: "cat-4",
     name: "Desk Accessories",
     slug: "desk-accessories",
-    image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&auto=format&fit=crop",
     description: "Wireless chargers, leather desk pads, and cable organizers.",
     productsCount: 15,
   },
@@ -37,7 +37,7 @@ export const mockCategories: Category[] = [
     id: "cat-5",
     name: "Lifestyle Apparel",
     slug: "lifestyle-apparel",
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&auto=format&fit=crop",
     description: "Eco-friendly tote bags, caps, and minimal jackets.",
     productsCount: 9,
   },
@@ -58,14 +58,14 @@ export const mockProducts: Product[] = [
     slug: "aura-studio-pro-anc-headphones",
     description: "Premium wireless noise-canceling headphones with spatial audio and a 40-hour battery life.",
     longDescription: "Engage in complete sensory isolation with the Aura Studio Pro. Engineered with custom-built 40mm dynamic drivers and hybrid active noise cancellation, these headphones filter out external clutter while delivering ultra-crisp highs and resonant bass. Crafted with memory-foam ear cushions and reinforced aluminum sliders, the design guarantees all-day wearability. Complete with USB-C rapid charging, spatial audio tracking, and multi-device Bluetooth pairing.",
-    price: 299,
-    discountPrice: 249,
+    price: 24999,
+    discountPrice: 20799,
     rating: 4.8,
     reviewsCount: 142,
     images: [
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-1",
     categorySlug: "audio-sound",
@@ -94,12 +94,12 @@ export const mockProducts: Product[] = [
     slug: "velo-fit-chronos-smartwatch",
     description: "An elegant smartwatch featuring comprehensive health tracking, customizable watch faces, and water resistance.",
     longDescription: "The Velo Fit Chronos blends time-honored circular watch aesthetics with cutting-edge biosensors. Keep track of sleep quality, heart rate, blood oxygen levels, and over 80 specific workouts. Encased in a surgical-grade stainless steel frame with an optimized AMOLED always-on display, this watch looks exceptional whether you are at a boardroom meeting or on a running track. Features an ultra-thin 10.5mm profile and a 9-day battery life.",
-    price: 199,
+    price: 16599,
     rating: 4.6,
     reviewsCount: 89,
     images: [
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1617043786394-f977fa12eddf?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-2",
     categorySlug: "wearables",
@@ -125,13 +125,13 @@ export const mockProducts: Product[] = [
     slug: "kore-magsafe-wireless-charger",
     description: "A solid aluminum MagSafe charging stand that charges your phone, watch, and earbuds simultaneously.",
     longDescription: "Declutter your bedside or desk setup with the Kore MagSafe 3-in-1 Charging Stand. Milled from a single block of aerospace-grade aluminum, this charger features a weighted base to ensure stability. Dedicated charging spots supply up to 15W of fast wireless power to your phone, alongside customized sections for smartwatches and wireless earbuds. Features an elegant matte black finish that blends in with any modern aesthetic.",
-    price: 79,
-    discountPrice: 59,
+    price: 6599,
+    discountPrice: 4949,
     rating: 4.5,
     reviewsCount: 56,
     images: [
-      "https://images.unsplash.com/photo-1622445262465-2481c4574875?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1616353071588-70724c69542a?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-4",
     categorySlug: "desk-accessories",
@@ -151,20 +151,21 @@ export const mockProducts: Product[] = [
     ],
     isLatest: true,
     isFlashSale: true,
-    flashSaleEnd: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
+    flashSaleEnd: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "prod-4",
-    name: "Kore mechanical-K8 Core Keyboard",
+    name: "Kore Mechanical-K8 Core Keyboard",
     slug: "kore-mechanical-k8-core-keyboard",
     description: "Compact 75% mechanical keyboard with hot-swappable tactile switches and dynamic white backlighting.",
     longDescription: "Designed for developers and minimalist workspaces, the Kore K8 mechanical keyboard features a space-saving 75% form factor. Pre-installed with custom-tuned pre-lubed silent brown tactile switches, it offers a deeply satisfying writing experience without disturbing others. Includes a hot-swappable PCB so you can easily install keycaps and switches of your choice. Supports seamless switching between macOS and Windows layouts via toggle.",
-    price: 149,
-    discountPrice: 129,
+    price: 12449,
+    discountPrice: 10799,
     rating: 4.9,
     reviewsCount: 112,
     images: [
-      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-3",
     categorySlug: "computer-gear",
@@ -191,12 +192,13 @@ export const mockProducts: Product[] = [
     slug: "aura-pods-comfort-noise-earbuds",
     description: "Ultra-lightweight true wireless earbuds with deep noise isolation and crystal-clear voice clarity.",
     longDescription: "The Aura Pods Comfort deliver massive audio output in an incredibly tiny footprint. At just 4.2g per earbud, you will barely feel them. Yet, they pack custom 11mm graphene drivers for robust acoustics and adaptive active noise cancellation that continuously analyzes surrounding sound levels to optimize performance. Microphones utilize beamforming technology with AI-driven voice isolation to deliver clear phone calls.",
-    price: 159,
-    discountPrice: 119,
+    price: 13249,
+    discountPrice: 9949,
     rating: 4.7,
     reviewsCount: 215,
     images: [
-      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-1",
     categorySlug: "audio-sound",
@@ -221,12 +223,13 @@ export const mockProducts: Product[] = [
     slug: "sol-eco-canvas-commuter-tote",
     description: "Spacious everyday tote bag made from water-repellent organic cotton canvas and vegan leather trims.",
     longDescription: "Carry your everyday essentials in sustainable comfort. Meticulously handcrafted from heavy-duty 14oz organic cotton canvas, this tote bag is layered with a plant-based water-repellent finish. The inside features a padded sleeve fitting laptops up to 16\", dual pocket dividers for water bottles, and zipped quick-access pockets. Handles are reinforced with durable vegan leather wraps for comfortable hand or shoulder carry.",
-    price: 49,
-    discountPrice: 39,
+    price: 4099,
+    discountPrice: 3249,
     rating: 4.4,
     reviewsCount: 31,
     images: [
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-5",
     categorySlug: "lifestyle-apparel",
@@ -251,11 +254,12 @@ export const mockProducts: Product[] = [
     slug: "velo-horizon-sunglasses",
     description: "Polarized modern sunglasses featuring ultra-durable acetate frames and complete UV400 protection.",
     longDescription: "A stylish companion for urban commutes and beachside weekends. The Velo Horizon sunglasses are carved from premium plant-based cellulose acetate and reinforced with triple-barrel hinges. Polarized TAC lenses eliminate blinding reflections and enhance natural contrast, while ensuring 100% defense against UVA/UVB rays. Comes with a recycled leather carrying pouch and microfiber cloth.",
-    price: 89,
+    price: 7449,
     rating: 4.5,
     reviewsCount: 42,
     images: [
-      "https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-5",
     categorySlug: "lifestyle-apparel",
@@ -280,11 +284,12 @@ export const mockProducts: Product[] = [
     slug: "nox-stealth-leather-phone-case",
     description: "Slim defensive case made from premium full-grain Horween leather with MagSafe support.",
     longDescription: "A gorgeous layer of defense for your phone. Meticulously wrapped in premium full-grain Horween leather, this case develops a beautiful dark patina over time. Underneath, a tough polycarbonate shell and internal shock-absorbing bumpers protect against drops up to 10 feet. Tactile buttons are built from machined aluminum to keep button presses crisp and feedback snappy.",
-    price: 49,
+    price: 4099,
     rating: 4.7,
     reviewsCount: 73,
     images: [
-      "https://images.unsplash.com/photo-1601597111158-2fceff270190?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1601597111158-2fceff270190?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-4",
     categorySlug: "desk-accessories",
@@ -320,23 +325,23 @@ export const mockReviews: Record<string, Review[]> = {
 export const mockTestimonials = [
   {
     id: 1,
-    name: "Sarah Jenkins",
+    name: "Arjun Mehta",
     role: "Senior Product Designer",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=120&auto=format&fit=crop",
-    quote: "FISTO represents the pinnacle of modern shopping design. The keyboard I ordered is a work of art, and checkout took seconds. Truly a Stripe-level checkout flow."
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop",
+    quote: "FISTO represents the pinnacle of modern shopping design. The keyboard I ordered is a work of art, and checkout took seconds. Truly a world-class checkout flow."
   },
   {
     id: 2,
-    name: "Alex Rivera",
+    name: "Priya Sharma",
     role: "Software Architect",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=120&auto=format&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop",
     quote: "The headphones are easily the best purchase I've made this year. High frequency clarity is staggering, and customer support was incredibly helpful when updating my address."
   },
   {
     id: 3,
-    name: "Liam O'Connor",
+    name: "Rohan Kapoor",
     role: "Creative Director",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=120&auto=format&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop",
     quote: "The design aesthetics of FISTO's website drew me in, but the high-quality packaging and fast shipping turned me into a loyal advocate. Five stars!"
   }
 ];
@@ -344,7 +349,7 @@ export const mockTestimonials = [
 export const mockFaqs = [
   {
     question: "How long does shipping take?",
-    answer: "Standard shipping takes 3-5 business days. Express shipping takes 1-2 business days. Shipping is complimentary on all orders exceeding $100."
+    answer: "Standard shipping takes 3-5 business days. Express shipping takes 1-2 business days. Shipping is complimentary on all orders exceeding ₹8,000."
   },
   {
     question: "Do you ship internationally?",

@@ -159,18 +159,22 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Breadcrumb items={[{ label: "Checkout" }]} />
-      <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Checkout</h1>
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Secure Checkout</h1>
+        <p className="text-base text-muted-foreground">Complete your order securely. All fields are required unless marked optional.</p>
+      </div>
 
       <form onSubmit={handleSubmit(handleCheckoutSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Side: Checkout Details Forms */}
         <div className="lg:col-span-2 space-y-6">
           {/* Contact Details Card */}
-          <div className="border border-border rounded-xl bg-card p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              1. Contact Information
-            </h3>
+          <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5">
+            <div className="flex items-center gap-3 pb-2 border-b border-border">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-sm font-bold">1</span>
+              <h3 className="text-base font-bold text-foreground tracking-tight">Contact Information</h3>
+            </div>
             <Input
               type="email"
               label="Email Address"
@@ -181,64 +185,68 @@ export default function CheckoutPage() {
           </div>
 
           {/* Shipping Address Card */}
-          <div className="border border-border rounded-xl bg-card p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              2. Shipping Details
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5">
+            <div className="flex items-center gap-3 pb-2 border-b border-border">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-sm font-bold">2</span>
+              <h3 className="text-base font-bold text-foreground tracking-tight">Shipping Details</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-5">
               <Input
                 label="First Name"
-                placeholder="John"
+                placeholder="Rajesh"
                 error={errors.firstName?.message}
                 {...register("firstName")}
               />
               <Input
                 label="Last Name"
-                placeholder="Doe"
+                placeholder="Kumar"
                 error={errors.lastName?.message}
                 {...register("lastName")}
               />
             </div>
             <Input
               label="Address Line 1"
-              placeholder="120 Main St"
+              placeholder="Plot 42, MG Road"
               error={errors.addressLine1?.message}
               {...register("addressLine1")}
             />
             <Input
               label="Address Line 2 (Optional)"
-              placeholder="Apt 4B"
+              placeholder="Apartment / Floor / Landmark"
               error={errors.addressLine2?.message}
               {...register("addressLine2")}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               <Input
                 label="City"
-                placeholder="San Francisco"
+                placeholder="Mumbai"
                 error={errors.city?.message}
                 {...register("city")}
               />
               <Input
                 label="State"
-                placeholder="CA"
+                placeholder="Maharashtra"
                 error={errors.state?.message}
                 {...register("state")}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               <Input
-                label="Postal / Zip Code"
-                placeholder="94107"
+                label="PIN Code"
+                placeholder="400001"
                 error={errors.postalCode?.message}
                 {...register("postalCode")}
               />
               <Select
                 label="Country"
                 options={[
-                  { value: "United States", label: "United States" },
-                  { value: "Canada", label: "Canada" },
-                  { value: "United Kingdom", label: "United Kingdom" },
-                  { value: "Australia", label: "Australia" },
+                  { value: "India", label: "🇮🇳 India" },
+                  { value: "United States", label: "🇺🇸 United States" },
+                  { value: "United Kingdom", label: "🇬🇧 United Kingdom" },
+                  { value: "Australia", label: "🇦🇺 Australia" },
+                  { value: "Canada", label: "🇨🇦 Canada" },
+                  { value: "Singapore", label: "🇸🇬 Singapore" },
+                  { value: "UAE", label: "🇦🇪 UAE" },
                 ]}
                 error={errors.country?.message}
                 {...register("country")}
@@ -247,35 +255,36 @@ export default function CheckoutPage() {
           </div>
 
           {/* Mock Payment Details Card */}
-          <div className="border border-border rounded-xl bg-card p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                3. Payment Details
-              </h3>
-              <CreditCard className="h-5 w-5 text-muted-foreground" />
+          <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5">
+            <div className="flex items-center gap-3 pb-2 border-b border-border">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-sm font-bold">3</span>
+              <h3 className="text-base font-bold text-foreground tracking-tight">Payment Details</h3>
+              <CreditCard className="h-5 w-5 text-muted-foreground ml-auto" />
             </div>
 
             <Input
-              label="Card Number (16 digits)"
+              label="Card Number"
               placeholder="4111 2222 3333 4444"
               maxLength={16}
               error={errors.cardNumber?.message}
+              hint="16-digit number on the front of your card"
               {...register("cardNumber")}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               <Input
-                label="Expiration Date (MM/YY)"
-                placeholder="12/28"
+                label="Expiry Date"
+                placeholder="MM/YY"
                 maxLength={5}
                 error={errors.cardExpiry?.message}
                 {...register("cardExpiry")}
               />
               <Input
-                label="CVC Security Code"
+                label="CVC / CVV"
                 placeholder="321"
                 maxLength={4}
                 error={errors.cardCvc?.message}
+                hint="3 or 4 digits on card back"
                 {...register("cardCvc")}
               />
             </div>
@@ -332,8 +341,8 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-11 font-semibold" isLoading={isSubmitting}>
-              Place Order {formatPrice(totals.total)}
+            <Button type="submit" variant="brand" className="w-full h-12 font-bold text-base rounded-xl" isLoading={isSubmitting}>
+              Place Order · {formatPrice(totals.total)}
             </Button>
           </div>
 
