@@ -227,7 +227,7 @@ export function Navbar() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-9 rounded-full border border-input bg-muted/40 pl-9 pr-3 text-sm focus:bg-background focus:ring-1 focus:ring-ring focus:outline-none transition-all"
             />
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
           </form>
 
           {/* Theme Toggle */}
