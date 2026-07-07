@@ -204,8 +204,8 @@ export const mockProducts: Product[] = [
     rating: 4.3,
     reviewsCount: 56,
     images: [
-      "https://images.unsplash.com/photo-1575311373937-040b8058bad0?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1575311373937-040b8058bad0?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-2",
     categorySlug: "wearables",
@@ -435,7 +435,7 @@ export const mockProducts: Product[] = [
     rating: 4.7,
     reviewsCount: 73,
     images: [
-      "https://images.unsplash.com/photo-1601597111158-2fceff270190?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=600&auto=format&fit=crop"
     ],
     categoryId: "cat-4",
