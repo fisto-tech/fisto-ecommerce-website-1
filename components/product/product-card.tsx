@@ -90,7 +90,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
           {isLatest && (
-            <span className="rounded-full bg-violet-500 px-2.5 py-1 text-sm font-bold text-white uppercase tracking-wider shadow-md">
+            <span className="rounded-full bg-sky-500 px-2.5 py-1 text-sm font-bold text-white uppercase tracking-wider shadow-md">
               New
             </span>
           )}

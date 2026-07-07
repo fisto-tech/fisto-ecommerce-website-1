@@ -29,7 +29,7 @@ export default async function HomePage() {
       {/* 1. Hero Section */}
       <section className="relative rounded-3xl overflow-hidden bg-zinc-950 text-white min-h-[540px] md:min-h-[640px] flex items-center px-8 md:px-14">
         {/* Animated Orbs */}
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-violet-600/25 blur-3xl float-orb pointer-events-none" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-blue-600/25 blur-3xl float-orb pointer-events-none" />
         <div className="absolute bottom-1/4 right-10 w-80 h-80 rounded-full bg-emerald-600/15 blur-3xl float-orb-slow pointer-events-none" />
         <div className="absolute top-10 left-1/2 w-64 h-64 rounded-full bg-blue-600/10 blur-3xl float-orb-slower pointer-events-none" />
 

@@ -73,7 +73,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
       {/* Announcement Bar */}
-      <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 px-4 py-2 text-center text-sm font-medium text-white tracking-wide">
+      <div className="bg-gradient-to-r from-indigo-600 via-sky-500 to-indigo-700 px-4 py-2 text-center text-sm font-medium text-white tracking-wide">
         SUMMER SALE: USE CODE <span className="font-bold underline">FISTO10</span> FOR 10% OFF + FREE SHIPPING ON ORDERS OVER ₹8,000
       </div>
 

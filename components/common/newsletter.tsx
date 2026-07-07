@@ -27,7 +27,7 @@ export function Newsletter() {
   };
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-indigo-200/30 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50 via-background to-violet-50/50 dark:from-indigo-950/40 dark:via-background dark:to-violet-950/30 p-8 md:p-12 shadow-sm text-center">
+    <div className="relative rounded-2xl overflow-hidden border border-indigo-200/30 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50 via-background to-sky-50/50 dark:from-indigo-950/40 dark:via-background dark:to-sky-950/30 p-8 md:p-12 shadow-sm text-center">
       {/* Decorative background gradient */}
       <div className="absolute inset-0 -z-10 bg-radial-gradient from-primary/5 via-transparent to-transparent opacity-60 pointer-events-none" />
 

@@ -22,8 +22,8 @@ const features = [
     icon: <ShieldCheck className="h-7 w-7 text-foreground" />,
     title: "2-Year Warranty",
     desc: "We stand behind our materials. Guaranteed product quality and support.",
-    color: "from-violet-500/10 to-violet-500/5",
-    iconBg: "bg-violet-500/10",
+    color: "from-sky-500/10 to-sky-500/5",
+    iconBg: "bg-sky-500/10",
   },
   {
     icon: <Headphones className="h-7 w-7 text-foreground" />,
