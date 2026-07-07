@@ -12,9 +12,12 @@ import {
   Settings,
   Plus,
   RefreshCw,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useOrderStore } from "../../store/order";
+import { useUserStore } from "../../store/user";
 
 const data = [
   { name: 'Mon', revenue: 4000 },
@@ -28,6 +31,8 @@ const data = [
 
 export default function AdminPage() {
   const [mounted, setMounted] = React.useState(false);
+  const { orders } = useOrderStore();
+  const { users } = useUserStore();
 
   React.useEffect(() => {
     setMounted(true);
@@ -35,19 +40,27 @@ export default function AdminPage() {
 
   if (!mounted) return null;
 
+  // Calculate live values
+  const revenueVal = orders
+    .filter((o) => o.status !== "cancelled" && o.status !== "refunded")
+    .reduce((sum, o) => sum + o.total, 0);
+
+  const activeOrdersCount = orders.filter(
+    (o) => o.status !== "delivered" && o.status !== "cancelled" && o.status !== "refunded"
+  ).length;
+
+  const usersCount = users.length;
+  const conversionRate = usersCount > 0 ? ((orders.length / usersCount) * 100).toFixed(1) + "%" : "0.0%";
+
   const kpis = [
-    { label: "Total Revenue", value: "$48,932.00", change: "+12.5%", icon: <DollarSign className="h-4.5 w-4.5 text-foreground" /> },
-    { label: "Active Orders", value: "329", change: "+8.2%", icon: <Package className="h-4.5 w-4.5 text-foreground" /> },
-    { label: "Registered Users", value: "1,248", change: "+18.3%", icon: <Users className="h-4.5 w-4.5 text-foreground" /> },
-    { label: "Conversion Rate", value: "3.4%", change: "+2.1%", icon: <TrendingUp className="h-4.5 w-4.5 text-foreground" /> },
+    { label: "Total Revenue", value: formatPrice(revenueVal), change: "+12.5%", icon: <DollarSign className="h-4.5 w-4.5 text-foreground" /> },
+    { label: "Active Orders", value: activeOrdersCount.toString(), change: "+8.2%", icon: <ShoppingBag className="h-4.5 w-4.5 text-foreground" /> },
+    { label: "Registered Users", value: usersCount.toLocaleString(), change: "+18.3%", icon: <Users className="h-4.5 w-4.5 text-foreground" /> },
+    { label: "Conversion Rate", value: conversionRate, change: "+2.1%", icon: <TrendingUp className="h-4.5 w-4.5 text-foreground" /> },
   ];
 
-  const recentOrders = [
-    { id: "ORD-984F7E21", customer: "Sophia Kim", total: 249, status: "completed", date: "2 mins ago" },
-    { id: "ORD-A109F2B8", customer: "David G.", total: 79, status: "pending", date: "15 mins ago" },
-    { id: "ORD-B483C2A9", customer: "Elena Rostova", total: 129, status: "processing", date: "1 hour ago" },
-    { id: "ORD-D392E184", customer: "Julian F.", total: 59, status: "completed", date: "4 hours ago" },
-  ];
+  // Get the most recent 4 orders
+  const recentOrders = orders.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10 space-y-8">
@@ -69,6 +82,12 @@ export default function AdminPage() {
             <Button size="sm" variant="outline">
               <Package className="h-4 w-4 mr-1.5" />
               Products
+            </Button>
+          </Link>
+          <Link href="/admin/orders">
+            <Button size="sm" variant="outline">
+              <ShoppingBag className="h-4 w-4 mr-1.5" />
+              Orders
             </Button>
           </Link>
           <Link href="/admin/users">
@@ -135,24 +154,32 @@ export default function AdminPage() {
         <div className="border rounded-xl bg-card p-6 shadow-sm space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-3">Recent Sales Logs</h3>
           <div className="space-y-4">
-            {recentOrders.map((ord) => (
-              <div key={ord.id} className="flex items-center justify-between text-sm border-b pb-3 last:border-0 last:pb-0">
-                <div className="space-y-0.5">
-                  <h4 className="font-bold text-foreground">{ord.customer}</h4>
-                  <p className="text-base text-muted-foreground font-mono">{ord.id} | {ord.date}</p>
+            {recentOrders.length === 0 ? (
+              <p className="text-muted-foreground text-sm italic py-4 text-center">No orders placed yet.</p>
+            ) : (
+              recentOrders.map((ord) => (
+                <div key={ord.id} className="flex items-center justify-between text-sm border-b pb-3 last:border-0 last:pb-0">
+                  <div className="space-y-0.5">
+                    <h4 className="font-bold text-foreground">{ord.shippingAddress.name}</h4>
+                    <p className="text-base text-muted-foreground font-mono">{ord.id} | {ord.date}</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <span className="font-bold text-foreground">{formatPrice(ord.total)}</span>
+                    <p>
+                      <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
+                        ord.status === "delivered" || ord.status === "shipped"
+                          ? "bg-emerald-500/10 text-emerald-600" 
+                          : ord.status === "cancelled" || ord.status === "refunded"
+                          ? "bg-red-500/10 text-red-600"
+                          : "bg-amber-500/10 text-amber-600"
+                      }`}>
+                        {ord.status}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right space-y-1">
-                  <span className="font-bold text-foreground">{formatPrice(ord.total)}</span>
-                  <p>
-                    <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
-                      ord.status === "completed" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                    }`}>
-                      {ord.status}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { useCartStore } from "../../../store/cart";
 import { useAuthStore } from "../../../store/auth";
 import { useOrderStore } from "../../../store/order";
 import { useToastStore } from "../../../store/toast";
+import { useProductStore } from "../../../store/product";
 import { formatPrice } from "../../../lib/utils";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -44,6 +45,7 @@ export default function CheckoutPage() {
   const { items, getTotals, clearCart } = useCartStore();
   const { user } = useAuthStore();
   const { addOrder } = useOrderStore();
+  const { products, updateProduct } = useProductStore();
   const addToast = useToastStore((state) => state.addToast);
 
   const {
@@ -135,6 +137,16 @@ export default function CheckoutPage() {
             state: data.state,
             postalCode: data.postalCode,
             country: data.country,
+          }
+        });
+
+        // Reduce product stock
+        items.forEach((item) => {
+          const prod = products.find((p) => p.id === item.product.id);
+          if (prod) {
+            updateProduct(prod.id, {
+              stock: Math.max(0, prod.stock - item.quantity),
+            });
           }
         });
 

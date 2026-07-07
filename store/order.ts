@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Order } from "../types";
+import { useProductStore } from "./product";
 
 interface OrderState {
   orders: Order[];
@@ -8,6 +9,7 @@ interface OrderState {
   updateOrderStatus: (orderId: string, status: Order["status"]) => void;
   requestRefund: (orderId: string) => { success: boolean; message: string };
   cancelOrder: (orderId: string) => { success: boolean; message: string };
+  updateOrderShipment: (orderId: string, status: Order["status"], trackingNumber?: string) => void;
   clearOrders: () => void;
 }
 
@@ -61,6 +63,17 @@ export const useOrderStore = create<OrderState>()(
           return { success: false, message: "Only pending or processing orders can be cancelled" };
         }
 
+        // Restore stock
+        const { products, updateProduct } = useProductStore.getState();
+        order.items.forEach((item) => {
+          const prod = products.find((p) => p.id === item.product.id);
+          if (prod) {
+            updateProduct(prod.id, {
+              stock: prod.stock + item.quantity
+            });
+          }
+        });
+
         set((state) => ({
           orders: state.orders.map((o) =>
             o.id === orderId ? { ...o, status: "cancelled" } : o
@@ -68,6 +81,33 @@ export const useOrderStore = create<OrderState>()(
         }));
         
         return { success: true, message: "Order cancelled successfully" };
+      },
+
+      updateOrderShipment: (orderId, status, trackingNumber) => {
+        const order = get().orders.find((o) => o.id === orderId);
+        if (!order) return;
+
+        // If the order is being cancelled or refunded, restore product stock
+        const isCancellation = (status === "cancelled" || status === "refunded") && 
+                               (order.status !== "cancelled" && order.status !== "refunded");
+
+        if (isCancellation) {
+          const { products, updateProduct } = useProductStore.getState();
+          order.items.forEach((item) => {
+            const prod = products.find((p) => p.id === item.product.id);
+            if (prod) {
+              updateProduct(prod.id, {
+                stock: prod.stock + item.quantity
+              });
+            }
+          });
+        }
+        
+        set((state) => ({
+          orders: state.orders.map((o) =>
+            o.id === orderId ? { ...o, status, trackingNumber: trackingNumber ?? o.trackingNumber } : o
+          ),
+        }));
       },
 
       clearOrders: () => {

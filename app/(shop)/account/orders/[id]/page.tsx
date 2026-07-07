@@ -55,6 +55,35 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const getStepStatus = (step: number) => {
+    const status = order.status;
+    
+    if (status === "cancelled" || status === "refunded") {
+      return { active: false, completed: false, isError: true };
+    }
+
+    if (step === 1) {
+      const isCompleted = ["processing", "shipped", "delivered"].includes(status);
+      return { active: true, completed: isCompleted };
+    }
+    if (step === 2) {
+      const isActive = ["processing", "shipped", "delivered"].includes(status);
+      const isCompleted = ["shipped", "delivered"].includes(status);
+      return { active: isActive, completed: isCompleted };
+    }
+    if (step === 3) {
+      const isActive = ["shipped", "delivered"].includes(status);
+      const isCompleted = ["delivered"].includes(status);
+      return { active: isActive, completed: isCompleted };
+    }
+    if (step === 4) {
+      const isActive = status === "delivered";
+      const isCompleted = status === "delivered";
+      return { active: isActive, completed: isCompleted };
+    }
+    return { active: false, completed: false };
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb
@@ -104,22 +133,65 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Step progress graphic */}
-        <div className="flex items-center justify-between pt-6 max-w-lg mx-auto text-sm sm:text-sm text-center font-medium">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">✓</div>
-            <span className="text-foreground">Confirmed</span>
+        {order.status === "cancelled" || order.status === "refunded" ? (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-700 text-sm font-semibold rounded-lg p-4 text-center">
+            This order has been {order.status}. Stock has been restored.
           </div>
-          <div className="flex-1 h-0.5 bg-primary mx-2" />
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold animate-pulse">2</div>
-            <span className="text-blue-500">Processing</span>
+        ) : (
+          <div className="flex items-center justify-between pt-6 max-w-xl mx-auto text-xs sm:text-sm text-center font-medium">
+            <div className="flex flex-col items-center gap-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${
+                getStepStatus(1).completed ? "bg-primary text-primary-foreground" : "bg-blue-600 text-white animate-pulse"
+              }`}>
+                {getStepStatus(1).completed ? "✓" : "1"}
+              </div>
+              <span className={getStepStatus(1).completed ? "text-muted-foreground font-semibold" : "text-foreground font-bold"}>Confirmed</span>
+            </div>
+            
+            <div className={`flex-1 h-0.5 mx-2 ${getStepStatus(2).active ? "bg-primary" : "bg-secondary"}`} />
+            
+            <div className="flex flex-col items-center gap-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${
+                getStepStatus(2).completed 
+                  ? "bg-primary text-primary-foreground" 
+                  : order.status === "processing"
+                  ? "bg-blue-600 text-white animate-pulse"
+                  : "bg-secondary text-muted-foreground"
+              }`}>
+                {getStepStatus(2).completed ? "✓" : "2"}
+              </div>
+              <span className={order.status === "processing" ? "text-blue-600 font-bold" : "text-muted-foreground"}>Processing</span>
+            </div>
+            
+            <div className={`flex-1 h-0.5 mx-2 ${getStepStatus(3).active ? "bg-primary" : "bg-secondary"}`} />
+            
+            <div className="flex flex-col items-center gap-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${
+                getStepStatus(3).completed 
+                  ? "bg-primary text-primary-foreground" 
+                  : order.status === "shipped"
+                  ? "bg-blue-600 text-white animate-pulse"
+                  : "bg-secondary text-muted-foreground"
+              }`}>
+                {getStepStatus(3).completed ? "✓" : "3"}
+              </div>
+              <span className={order.status === "shipped" ? "text-blue-600 font-bold" : "text-muted-foreground"}>Shipped</span>
+            </div>
+            
+            <div className={`flex-1 h-0.5 mx-2 ${getStepStatus(4).active ? "bg-primary" : "bg-secondary"}`} />
+            
+            <div className="flex flex-col items-center gap-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${
+                order.status === "delivered" 
+                  ? "bg-emerald-600 text-white" 
+                  : "bg-secondary text-muted-foreground"
+              }`}>
+                {order.status === "delivered" ? "✓" : "4"}
+              </div>
+              <span className={order.status === "delivered" ? "text-emerald-600 font-bold" : "text-muted-foreground"}>Delivered</span>
+            </div>
           </div>
-          <div className="flex-1 h-0.5 bg-secondary mx-2" />
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center font-bold">3</div>
-            <span className="text-muted-foreground">Shipped</span>
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
