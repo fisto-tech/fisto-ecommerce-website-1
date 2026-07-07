@@ -14,6 +14,17 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+const data = [
+  { name: 'Mon', revenue: 4000 },
+  { name: 'Tue', revenue: 3000 },
+  { name: 'Wed', revenue: 5000 },
+  { name: 'Thu', revenue: 2780 },
+  { name: 'Fri', revenue: 8900 },
+  { name: 'Sat', revenue: 4390 },
+  { name: 'Sun', revenue: 3490 },
+];
 
 export default function AdminPage() {
   const [mounted, setMounted] = React.useState(false);
@@ -60,10 +71,10 @@ export default function AdminPage() {
               Products
             </Button>
           </Link>
-          <Link href="/admin/employees">
+          <Link href="/admin/users">
             <Button size="sm" variant="outline">
               <Users className="h-4 w-4 mr-1.5" />
-              Employees
+              Users
             </Button>
           </Link>
           <Link href="/admin/products/new">
@@ -100,52 +111,23 @@ export default function AdminPage() {
             <span className="text-base text-muted-foreground">Updated hourly</span>
           </div>
 
-          <div className="h-64 relative flex items-end pt-4">
-            {/* Grid Lines */}
-            <div className="absolute inset-x-0 top-1/4 border-b border-border/40" />
-            <div className="absolute inset-x-0 top-2/4 border-b border-border/40" />
-            <div className="absolute inset-x-0 top-3/4 border-b border-border/40" />
-
-            {/* Custom SVG Line Graph */}
-            <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-              {/* Soft Gradient Under Line */}
-              <defs>
-                <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 5,80 Q 20,40 35,60 T 65,30 T 95,15 L 95,100 L 5,100 Z"
-                fill="url(#chart-grad)"
-              />
-              <path
-                d="M 5,80 Q 20,40 35,60 T 65,30 T 95,15"
-                fill="none"
-                stroke="var(--color-primary)"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              {/* Data points */}
-              <circle cx="5" cy="80" r="2.5" fill="var(--color-primary)" />
-              <circle cx="20" cy="45" r="2.5" fill="var(--color-primary)" />
-              <circle cx="35" cy="60" r="2.5" fill="var(--color-primary)" />
-              <circle cx="50" cy="45" r="2.5" fill="var(--color-primary)" />
-              <circle cx="65" cy="30" r="2.5" fill="var(--color-primary)" />
-              <circle cx="80" cy="22" r="2.5" fill="var(--color-primary)" />
-              <circle cx="95" cy="15" r="2.5" fill="var(--color-primary)" />
-            </svg>
-
-            {/* X Axis labels */}
-            <div className="absolute bottom-0 inset-x-0 flex justify-between px-1 text-base text-muted-foreground font-mono uppercase tracking-wider">
-              <span>Mon</span>
-              <span>Tue</span>
-              <span>Wed</span>
-              <span>Thu</span>
-              <span>Fri</span>
-              <span>Sat</span>
-              <span>Sun</span>
-            </div>
+          <div className="h-64 relative pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)' }}
+                  itemStyle={{ color: '#10b981', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} dy={10} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

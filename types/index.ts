@@ -11,10 +11,14 @@ export interface Address {
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
   phone?: string;
   address?: Address;
+  role?: "customer" | "admin";
+  status?: "Active" | "Inactive";
+  joinDate?: string;
 }
 
 export interface Brand {
@@ -103,12 +107,3 @@ export interface Order {
   trackingNumber?: string;
 }
 
-export interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  department: string;
-  status: "Active" | "Inactive";
-  joinDate: string;
-}

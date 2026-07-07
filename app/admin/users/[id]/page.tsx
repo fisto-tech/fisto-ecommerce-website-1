@@ -4,52 +4,50 @@ import * as React from "react";
 import { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEmployeeStore } from "../../../../store/employee";
+import { useUserStore } from "../../../../store/user";
 import { useToastStore } from "../../../../store/toast";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { ArrowLeft, Save } from "lucide-react";
-import { Employee } from "../../../../types";
+import { User } from "../../../../types";
 
-export default function AdminEmployeeEditPage({ params }: { params: Promise<{ id: string }> }) {
+export default function AdminUserEditPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const isNew = resolvedParams.id === "new";
   const router = useRouter();
   
   const [mounted, setMounted] = React.useState(false);
-  const { employees, addEmployee, updateEmployee } = useEmployeeStore();
+  const { users, addUser, updateUser } = useUserStore();
   const { addToast } = useToastStore();
   
-  const existingEmployee = isNew ? null : employees.find((emp) => emp.id === resolvedParams.id);
+  const existingUser = isNew ? null : users.find((usr) => usr.id === resolvedParams.id);
 
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
-    role: "",
-    department: "",
+    role: "customer" as "customer" | "admin",
     status: "Active" as "Active" | "Inactive",
   });
 
   React.useEffect(() => {
     setMounted(true);
-    if (existingEmployee) {
+    if (existingUser) {
       setFormData({
-        name: existingEmployee.name,
-        email: existingEmployee.email,
-        role: existingEmployee.role,
-        department: existingEmployee.department,
-        status: existingEmployee.status,
+        name: existingUser.name || `${existingUser.firstName || ''} ${existingUser.lastName || ''}`.trim() || "",
+        email: existingUser.email || "",
+        role: existingUser.role || "customer",
+        status: existingUser.status || "Active",
       });
     }
-  }, [existingEmployee]);
+  }, [existingUser]);
 
   if (!mounted) return null;
 
-  if (!isNew && !existingEmployee) {
+  if (!isNew && !existingUser) {
     return (
       <div className="min-h-screen p-10 text-center space-y-4">
-        <h1 className="text-xl font-bold">Employee not found</h1>
-        <Link href="/admin/employees"><Button>Go Back</Button></Link>
+        <h1 className="text-xl font-bold">User not found</h1>
+        <Link href="/admin/users"><Button>Go Back</Button></Link>
       </div>
     );
   }
@@ -62,35 +60,35 @@ export default function AdminEmployeeEditPage({ params }: { params: Promise<{ id
     e.preventDefault();
 
     if (isNew) {
-      const newId = `EMP-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const newId = `USR-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
       const today = new Date().toISOString().split('T')[0];
       
-      addEmployee({
+      addUser({
         id: newId,
         ...formData,
         joinDate: today,
-      } as Employee);
+      } as User);
       
-      addToast("Employee added successfully!", "success");
+      addToast("Customer added successfully!", "success");
     } else {
-      updateEmployee(resolvedParams.id, formData);
-      addToast("Employee updated successfully!", "success");
+      updateUser(resolvedParams.id, formData);
+      addToast("Customer updated successfully!", "success");
     }
 
-    router.push("/admin/employees");
+    router.push("/admin/users");
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10 space-y-8">
       {/* Top Header */}
       <div className="flex items-center gap-3 border-b pb-4">
-        <Link href="/admin/employees">
+        <Link href="/admin/users">
           <Button variant="outline" size="icon" className="rounded-full h-8 w-8">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-xl font-bold tracking-tight">{isNew ? "Add New Employee" : "Edit Employee"}</h1>
+          <h1 className="text-xl font-bold tracking-tight">{isNew ? "Add New Customer" : "Edit Customer"}</h1>
         </div>
       </div>
 
@@ -118,45 +116,42 @@ export default function AdminEmployeeEditPage({ params }: { params: Promise<{ id
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input 
-              label="Role / Title" 
-              name="role" 
-              value={formData.role} 
-              onChange={handleChange} 
-              placeholder="e.g. Sales Associate"
-              required 
-            />
-            <Input 
-              label="Department" 
-              name="department" 
-              value={formData.department} 
-              onChange={handleChange} 
-              placeholder="e.g. Retail Operations"
-              required 
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-foreground">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full flex h-10 rounded-md border border-border/60 bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-foreground">Role</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full flex h-10 rounded-md border border-border/60 bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+              >
+                <option value="customer">Customer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-foreground">Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full flex h-10 rounded-md border border-border/60 bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
           </div>
 
           <div className="pt-4 border-t flex gap-4">
-            <Button type="button" variant="outline" onClick={() => router.push("/admin/employees")}>
+            <Button type="button" variant="outline" onClick={() => router.push("/admin/users")}>
               Cancel
             </Button>
             <Button type="submit">
               <Save className="h-4 w-4 mr-1.5" />
-              {isNew ? "Add Employee" : "Save Changes"}
+              {isNew ? "Add Customer" : "Save Changes"}
             </Button>
           </div>
         </form>
