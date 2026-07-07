@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 import { useCartStore } from "../../store/cart";
 import { useWishlistStore } from "../../store/wishlist";
 import { useAuthStore } from "../../store/auth";
+import { useProductStore } from "../../store/product";
 import {
   Search,
   ShoppingBag,
@@ -55,12 +56,43 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = React.useState<"shop" | "brands" | null>(null);
+  
+  const [isFocused, setIsFocused] = React.useState(false);
+  const [isMobileFocused, setIsMobileFocused] = React.useState(false);
+  const searchRef = React.useRef<HTMLDivElement>(null);
+  const mobileSearchRef = React.useRef<HTMLDivElement>(null);
+  const { products } = useProductStore();
 
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
     setMounted(true);
     setSearchQuery(searchParams.get("q") || "");
   }, [searchParams]);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
+        setIsMobileFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const suggestions = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query.length < 2) return [];
+    return products
+      .filter((p) =>
+        p.name.toLowerCase().includes(query) ||
+        p.categorySlug.toLowerCase().includes(query) ||
+        (p.brandName && p.brandName.toLowerCase().includes(query))
+      )
+      .slice(0, 5);
+  }, [searchQuery, products]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,16 +252,56 @@ export function Navbar() {
         {/* Search & Actions */}
         <div className="flex items-center gap-4">
           {/* Search Form */}
-          <form onSubmit={handleSearchSubmit} className="hidden sm:flex relative max-w-xs w-[180px] lg:w-[220px]">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 rounded-full border border-input bg-muted/40 pl-9 pr-3 text-sm focus:bg-background focus:ring-1 focus:ring-ring focus:outline-none transition-all"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-          </form>
+          <div ref={searchRef} className="hidden sm:block relative max-w-xs w-[180px] lg:w-[220px]">
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                className="w-full h-9 rounded-full border border-input bg-muted/40 pl-9 pr-3 text-sm focus:bg-background focus:ring-1 focus:ring-ring focus:outline-none transition-all"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            </form>
+
+            {/* Desktop Suggestions Dropdown */}
+            {isFocused && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl border border-border bg-card shadow-xl overflow-hidden divide-y divide-border/60">
+                <div className="p-2 max-h-[280px] overflow-y-auto space-y-1">
+                  {suggestions.map((product) => (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.slug}`}
+                      onClick={() => setIsFocused(false)}
+                      className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                    >
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="h-10 w-10 rounded-md object-cover bg-muted shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.brandName} • {formatPrice(product.discountPrice || product.price)}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setIsFocused(false);
+                    if (searchQuery.trim()) {
+                      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    }
+                  }}
+                  className="w-full text-left p-2.5 text-xs font-bold text-primary hover:bg-secondary transition-colors block border-t"
+                >
+                  See all results for &ldquo;{searchQuery}&rdquo;
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Theme Toggle */}
           <button
@@ -307,16 +379,60 @@ export function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden border-t border-border bg-background px-4 py-4"
           >
-            <form onSubmit={handleSearchSubmit} className="relative w-full mb-4">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-muted/60 pl-10 pr-4 text-sm focus:outline-none"
-              />
-              <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
-            </form>
+            <div ref={mobileSearchRef} className="relative w-full mb-4">
+              <form onSubmit={handleSearchSubmit} className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsMobileFocused(true)}
+                  className="w-full h-10 rounded-md border border-input bg-muted/60 pl-10 pr-4 text-sm focus:outline-none"
+                />
+                <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+              </form>
+
+              {/* Mobile Suggestions Dropdown */}
+              {isMobileFocused && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl border border-border bg-card shadow-xl overflow-hidden divide-y divide-border/60">
+                  <div className="p-2 max-h-[220px] overflow-y-auto space-y-1">
+                    {suggestions.map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/products/${product.slug}`}
+                        onClick={() => {
+                          setIsMobileFocused(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                      >
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="h-10 w-10 rounded-md object-cover bg-muted shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{product.brandName} • {formatPrice(product.discountPrice || product.price)}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMobileFocused(false);
+                      setIsMobileMenuOpen(false);
+                      if (searchQuery.trim()) {
+                        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                      }
+                    }}
+                    className="w-full text-left p-2.5 text-xs font-bold text-primary hover:bg-secondary transition-colors block border-t"
+                  >
+                    See all results for &ldquo;{searchQuery}&rdquo;
+                  </button>
+                </div>
+              )}
+            </div>
             <nav className="flex flex-col gap-3">
               <Link
                 href="/products"
