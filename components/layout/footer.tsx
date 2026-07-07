@@ -12,6 +12,11 @@ export function Footer() {
   const [email, setEmail] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
@@ -145,7 +150,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-base text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} FISTO Inc. All rights reserved.</p>
+          <p>&copy; {mounted ? new Date().getFullYear() : "2026"} FISTO Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Designed with &hearts; for Creators</span>
             <div className="flex gap-2 text-muted-foreground opacity-60">
