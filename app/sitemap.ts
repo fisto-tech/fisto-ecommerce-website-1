@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { ApiService } from "../services/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://fisto-ecommerce.vercel.app";
+  const baseUrl = "https://fisto-ecommerce-website-1.vercel.app";
 
   // Static paths
   const staticPaths = [

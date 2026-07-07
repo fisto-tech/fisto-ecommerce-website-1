@@ -73,15 +73,15 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
       {/* Announcement Bar */}
-      <div className="bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground tracking-wide">
+      <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 px-4 py-2 text-center text-sm font-medium text-white tracking-wide">
         SUMMER SALE: USE CODE <span className="font-bold underline">FISTO10</span> FOR 10% OFF + FREE SHIPPING ON ORDERS OVER $100
       </div>
 
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="text-xl font-bold tracking-tighter text-foreground hover:opacity-90 transition-opacity">
-            FISTO<span className="text-muted-foreground font-light">.</span>
+          <Link href="/" className="text-xl font-extrabold tracking-tighter text-foreground flex items-center gap-0.5">
+            FISTO<span className="text-brand font-light">.</span>
           </Link>
 
           {/* Desktop Navigation */}

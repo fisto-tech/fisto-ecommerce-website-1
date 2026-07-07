@@ -20,11 +20,11 @@ export const metadata: Metadata = {
     template: "%s | FISTO Store",
   },
   description: "Explore FISTO's curated premium collection. Highly performant, design-forward, accessibility-first online shopping experience.",
-  metadataBase: new URL("https://fisto-ecommerce.vercel.app"),
+  metadataBase: new URL("https://fisto-ecommerce-website-1.vercel.app"),
   openGraph: {
     title: "FISTO | Modern Premium E-Commerce Experience",
     description: "Explore FISTO's curated premium collection. Highly performant, design-forward, accessibility-first online shopping experience.",
-    url: "https://fisto-ecommerce.vercel.app",
+    url: "https://fisto-ecommerce-website-1.vercel.app",
     siteName: "FISTO Store",
     locale: "en_US",
     type: "website",

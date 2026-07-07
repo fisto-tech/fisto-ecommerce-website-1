@@ -36,7 +36,7 @@ export function FlashSaleCountdown() {
   const formatNumber = (num: number) => String(num).padStart(2, "0");
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-r from-red-500/10 via-amber-500/5 to-transparent p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div className="relative overflow-hidden rounded-2xl border border-amber-200/30 dark:border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/8 to-red-500/10 p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
       <div className="space-y-3 max-w-md text-center md:text-left">
         <div className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 dark:bg-red-500/25 px-3 py-1 text-sm font-bold text-red-500 uppercase tracking-wide">
           <Flame className="h-4 w-4 fill-red-500" />
@@ -55,7 +55,7 @@ export function FlashSaleCountdown() {
         <div className="flex gap-2">
           {Object.entries(timeLeft).map(([key, value]) => (
             <div key={key} className="flex flex-col items-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-card border border-border text-lg font-bold text-foreground font-mono shadow-sm">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-500 text-white text-xl font-bold font-mono shadow-md shadow-amber-500/30">
                 {formatNumber(value)}
               </div>
               <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground mt-1">
@@ -66,7 +66,7 @@ export function FlashSaleCountdown() {
         </div>
 
         <Link href="/products?sort=latest">
-          <Button className="font-semibold" size="sm">
+          <Button variant="brand" className="font-semibold" size="sm">
             Shop Deals
             <ArrowRight className="h-4 w-4 ml-1.5" />
           </Button>

@@ -34,8 +34,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="space-y-4">
-            <Link href="/" className="text-xl font-bold tracking-tighter text-foreground">
-              FISTO<span className="text-muted-foreground font-light">.</span>
+            <Link href="/" className="text-xl font-extrabold tracking-tighter text-foreground flex items-center gap-0.5">
+              FISTO<span className="text-brand font-light">.</span>
             </Link>
             <p className="text-base text-muted-foreground leading-relaxed max-w-xs">
               Meticulously crafted items for developers, designers, and creators who value detail, aesthetics, and ergonomics.

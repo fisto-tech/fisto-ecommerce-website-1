@@ -40,7 +40,7 @@ export default async function HomePage() {
 
         <div className="max-w-2xl space-y-7 relative z-10">
           <AnimateOnScroll variant="fade-up" delay={0}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-1.5 text-base font-semibold uppercase tracking-wider text-emerald-400">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/15 px-4 py-1.5 text-base font-semibold uppercase tracking-wider text-indigo-300">
               <Sparkles className="h-4 w-4" />
               Designed for the Detail-Oriented
             </div>
@@ -61,7 +61,7 @@ export default async function HomePage() {
           <AnimateOnScroll variant="fade-up" delay={0.26}>
             <div className="flex flex-wrap gap-4 pt-2">
               <Link href="/products">
-                <Button size="lg" className="bg-white text-black hover:bg-white/92 font-bold px-7 rounded-xl shadow-lg">
+                <Button size="lg" variant="brand" className="font-bold px-7 rounded-xl shadow-lg">
                   Shop Collection
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
