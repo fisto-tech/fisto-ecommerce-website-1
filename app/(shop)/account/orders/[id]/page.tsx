@@ -5,8 +5,10 @@ import Link from "next/link";
 import { formatPrice } from "../../../../../lib/utils";
 import { Breadcrumb } from "../../../../../components/common/breadcrumb";
 import { Button } from "../../../../../components/ui/button";
-import { ArrowLeft, Package, Clock, Truck, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Package, Clock, Truck, ShieldCheck, AlertCircle } from "lucide-react";
 import { use } from "react";
+import { useOrderStore } from "../../../../../store/order";
+import { useToastStore } from "../../../../../store/toast";
 
 export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -19,46 +21,29 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   if (!mounted) return null;
 
-  // Mock order details
-  const mockOrder = {
-    id,
-    date: "2026-07-06",
-    status: "processing",
-    trackingNumber: "TRK98327189",
-    paymentMethod: "Credit Card (Ending in 4444)",
-    subtotal: 79,
-    discount: 10,
-    tax: 6.9,
-    total: 75.9,
-    shippingAddress: {
-      name: "John Customer",
-      addressLine1: "120 Vercel Way",
-      addressLine2: "Suite 400",
-      city: "San Francisco",
-      state: "CA",
-      postalCode: "94107",
-      country: "United States",
-    },
-    items: [
-      {
-        id: "prod-3",
-        name: "Kore MagSafe Wireless Charger",
-        slug: "kore-magsafe-wireless-charger",
-        price: 59,
-        quantity: 1,
-        color: "Matte Black",
-        image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?q=80&w=200&auto=format&fit=crop",
-      },
-      {
-        id: "prod-8",
-        name: "Nox Stealth Leather Phone Case",
-        slug: "nox-stealth-leather-phone-case",
-        price: 29,
-        quantity: 1,
-        color: "Chestnut Brown",
-        image: "https://images.unsplash.com/photo-1601597111158-2fceff270190?q=80&w=200&auto=format&fit=crop",
-      }
-    ]
+  const { orders, requestRefund } = useOrderStore();
+  const { addToast } = useToastStore();
+  const order = orders.find((o) => o.id === id);
+
+  if (!order) {
+    return (
+      <div className="max-w-md mx-auto py-20 text-center space-y-4">
+        <h1 className="text-xl font-bold tracking-tight">Order Not Found</h1>
+        <p className="text-base text-muted-foreground">We couldn't find an order with this ID.</p>
+        <Link href="/account/orders">
+          <Button>Back to Orders</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const handleRefundRequest = () => {
+    const result = requestRefund(id);
+    if (result.success) {
+      addToast(result.message, "success");
+    } else {
+      addToast(result.message, "error");
+    }
   };
 
   return (
@@ -81,7 +66,15 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-3xl font-mono">
             {id}
           </h1>
-          <p className="text-base text-muted-foreground">Placed on {mockOrder.date}</p>
+          <p className="text-base text-muted-foreground">Placed on {order.date}</p>
+        </div>
+        <div className="ml-auto">
+          {order.status === "delivered" && (
+            <Button variant="outline" className="text-amber-600 border-amber-600/30 hover:bg-amber-600/10" onClick={handleRefundRequest}>
+              <AlertCircle className="h-4 w-4 mr-2" />
+              Request Refund
+            </Button>
+          )}
         </div>
       </div>
 
@@ -90,9 +83,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         <div className="flex items-center justify-between text-base font-semibold pb-4 border-b">
           <span className="flex items-center gap-1.5">
             <Clock className="h-4 w-4 text-blue-500" />
-            Status: <span className="text-blue-500 font-bold uppercase">{mockOrder.status}</span>
+            Status: <span className={`font-bold uppercase ${order.status === "refund_requested" ? "text-amber-500" : order.status === "refunded" ? "text-red-500" : "text-blue-500"}`}>{order.status.replace("_", " ")}</span>
           </span>
-          <span className="font-mono text-muted-foreground">Tracking #: {mockOrder.trackingNumber}</span>
+          <span className="font-mono text-muted-foreground">Tracking #: {order.trackingNumber || "Pending"}</span>
         </div>
 
         {/* Step progress graphic */}
@@ -120,18 +113,20 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <div className="border border-border rounded-xl bg-card p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-bold text-foreground">Order Items</h3>
             <div className="divide-y">
-              {mockOrder.items.map((item) => (
-                <div key={item.id} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+              {order.items.map((item) => (
+                <div key={item.product.id + item.selectedColor + item.selectedSize} className="flex gap-4 py-4 first:pt-0 last:pb-0">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
-                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                    <img src={item.product.images[0]} alt={item.product.name} className="h-full w-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <Link href={`/products/${item.slug}`} className="hover:underline">
-                      <h4 className="text-base font-semibold text-foreground truncate">{item.name}</h4>
+                    <Link href={`/products/${item.product.slug}`} className="hover:underline">
+                      <h4 className="text-base font-semibold text-foreground truncate">{item.product.name}</h4>
                     </Link>
-                    <p className="text-base text-muted-foreground">Color: {item.color} | Qty {item.quantity}</p>
+                    <p className="text-base text-muted-foreground">
+                      {item.selectedColor ? `Color: ${item.selectedColor} | ` : ""}Qty {item.quantity}
+                    </p>
                   </div>
-                  <span className="text-sm font-bold">{formatPrice(item.price * item.quantity)}</span>
+                  <span className="text-sm font-bold">{formatPrice((item.product.discountPrice || item.product.price) * item.quantity)}</span>
                 </div>
               ))}
             </div>
@@ -146,19 +141,19 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <div className="space-y-2 text-base text-muted-foreground">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>{formatPrice(mockOrder.subtotal)}</span>
+                <span>{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-emerald-600">
                 <span>Discount</span>
-                <span>-{formatPrice(mockOrder.discount)}</span>
+                <span>-{formatPrice(order.discount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Sales Tax</span>
-                <span>{formatPrice(mockOrder.tax)}</span>
+                <span>{formatPrice(order.tax)}</span>
               </div>
               <div className="flex justify-between border-t pt-2 text-sm font-bold text-foreground">
                 <span>Total Charge</span>
-                <span>{formatPrice(mockOrder.total)}</span>
+                <span>{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>
@@ -167,12 +162,12 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <div className="border border-border rounded-xl bg-card p-6 shadow-sm space-y-3">
             <h3 className="text-sm font-bold text-foreground">Shipping Details</h3>
             <div className="text-base text-muted-foreground leading-relaxed">
-              <p className="font-semibold text-foreground">{mockOrder.shippingAddress.name}</p>
-              <p>{mockOrder.shippingAddress.addressLine1}</p>
-              <p>{mockOrder.shippingAddress.addressLine2}</p>
-              <p>{mockOrder.shippingAddress.city}, {mockOrder.shippingAddress.state} {mockOrder.shippingAddress.postalCode}</p>
-              <p>{mockOrder.shippingAddress.country}</p>
-              <p className="mt-2 text-sm text-foreground font-mono uppercase">Payment: {mockOrder.paymentMethod}</p>
+              <p className="font-semibold text-foreground">{order.shippingAddress.name}</p>
+              <p>{order.shippingAddress.addressLine1}</p>
+              <p>{order.shippingAddress.addressLine2}</p>
+              <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}</p>
+              <p>{order.shippingAddress.country}</p>
+              <p className="mt-2 text-sm text-foreground font-mono uppercase">Payment: {order.paymentMethod}</p>
             </div>
           </div>
         </div>

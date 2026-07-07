@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuthStore } from "../../../store/auth";
+import { useOrderStore } from "../../../store/order";
 import { useToastStore } from "../../../store/toast";
 import { formatPrice } from "../../../lib/utils";
 import { Button } from "../../../components/ui/button";
@@ -99,11 +100,8 @@ export default function AccountPage() {
     router.push("/");
   };
 
-  // Mock list of recent orders
-  const mockOrdersList = [
-    { id: "ORD-984F7E21", date: "2026-06-24", total: 249, status: "delivered" },
-    { id: "ORD-A109F2B8", date: "2026-07-06", total: 79, status: "processing" },
-  ];
+  const { orders } = useOrderStore();
+  const recentOrders = orders.slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -214,27 +212,33 @@ export default function AccountPage() {
           </h3>
 
           <div className="space-y-4">
-            {mockOrdersList.map((order) => (
-              <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/10 transition-colors">
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-foreground font-mono">{order.id}</h4>
-                  <p className="text-base text-muted-foreground">{order.date} | {formatPrice(order.total)}</p>
+            {recentOrders.length === 0 ? (
+              <p className="text-sm text-muted-foreground italic text-center py-4">No recent orders found.</p>
+            ) : (
+              recentOrders.map((order) => (
+                <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/10 transition-colors">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-foreground font-mono">{order.id}</h4>
+                    <p className="text-base text-muted-foreground">{order.date} | {formatPrice(order.total)}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`rounded-full px-2 py-0.5 text-sm font-bold uppercase tracking-wider ${
+                      order.status === "delivered" ? "bg-emerald-500/10 text-emerald-600" : 
+                      order.status === "refund_requested" ? "bg-amber-500/10 text-amber-600" :
+                      order.status === "refunded" ? "bg-red-500/10 text-red-600" :
+                      "bg-blue-500/10 text-blue-600"
+                    }`}>
+                      {order.status.replace("_", " ")}
+                    </span>
+                    <Link href={`/account/orders/${order.id}`}>
+                      <button className="text-muted-foreground hover:text-foreground cursor-pointer" aria-label="View order details">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`rounded-full px-2 py-0.5 text-sm font-bold uppercase tracking-wider ${
-                    order.status === "delivered" ? "bg-emerald-500/10 text-emerald-600" : "bg-blue-500/10 text-blue-600"
-                  }`}>
-                    {order.status}
-                  </span>
-                  {/* View Details mock trigger */}
-                  <Link href={`/account/orders/${order.id}`}>
-                    <button className="text-muted-foreground hover:text-foreground cursor-pointer" aria-label="View order details">
-                      <Eye className="h-4 w-4" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <Link href="/account/orders" className="block text-center mt-2">

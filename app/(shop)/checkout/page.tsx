@@ -7,16 +7,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useCartStore } from "../../../store/cart";
 import { useAuthStore } from "../../../store/auth";
+import { useOrderStore } from "../../../store/order";
 import { useToastStore } from "../../../store/toast";
-import { ApiService } from "../../../services/api";
 import { formatPrice } from "../../../lib/utils";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Select } from "../../../components/ui/select";
 import { Breadcrumb } from "../../../components/common/breadcrumb";
-import { ShieldCheck, Truck, CreditCard, ChevronRight, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, CheckCircle2, ChevronRight, Lock } from "lucide-react";
 
-// Form validation schema with Zod
 const checkoutSchema = z.object({
   email: z.string().email("Invalid email address"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -27,9 +26,9 @@ const checkoutSchema = z.object({
   state: z.string().min(2, "State must be at least 2 characters"),
   postalCode: z.string().min(4, "Postal code must be at least 4 characters"),
   country: z.string().min(2, "Country must be at least 2 characters"),
-  cardNumber: z.string().regex(/^\d{16}$/, "Card number must be exactly 16 digits"),
-  cardExpiry: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Expiry must be MM/YY"),
-  cardCvc: z.string().regex(/^\d{3,4}$/, "CVC must be 3 or 4 digits"),
+  cardNumber: z.string().regex(/^\d{16}$/, "Card number must be exactly 16 digits").optional().or(z.literal('')),
+  cardExpiry: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Expiry must be MM/YY").optional().or(z.literal('')),
+  cardCvc: z.string().regex(/^\d{3,4}$/, "CVC must be 3 or 4 digits").optional().or(z.literal('')),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -39,16 +38,20 @@ export default function CheckoutPage() {
   const [mounted, setMounted] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [orderId, setOrderId] = React.useState("");
+  const [currentStep, setCurrentStep] = React.useState(1);
+  const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
   
   const { items, getTotals, clearCart } = useCartStore();
   const { user } = useAuthStore();
+  const { addOrder } = useOrderStore();
   const addToast = useToastStore((state) => state.addToast);
 
-  // Sync initial user details if logged in
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    trigger,
+    formState: { errors },
+    getValues
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -60,10 +63,10 @@ export default function CheckoutPage() {
       city: user?.address?.city || "",
       state: user?.address?.state || "",
       postalCode: user?.address?.postalCode || "",
-      country: user?.address?.country || "United States",
-      cardNumber: "",
-      cardExpiry: "",
-      cardCvc: "",
+      country: user?.address?.country || "India",
+      cardNumber: "4111222233334444", // dummy defaults for smoother testing
+      cardExpiry: "12/28",
+      cardCvc: "123",
     },
   });
 
@@ -83,39 +86,68 @@ export default function CheckoutPage() {
 
   const totals = getTotals();
 
-  const handleCheckoutSubmit = async (data: CheckoutFormValues) => {
-    if (items.length === 0) {
-      addToast("Your bag is empty", "error");
-      return;
+  const handleNextStep = async () => {
+    let isValid = false;
+    if (currentStep === 1) {
+      isValid = await trigger(["email"]);
+    } else if (currentStep === 2) {
+      isValid = await trigger(["firstName", "lastName", "addressLine1", "city", "state", "postalCode", "country"]);
     }
-
-    try {
-      const order = await ApiService.createOrder({
-        userId: user?.id || "guest",
-        items,
-        subtotal: totals.subtotal,
-        discount: totals.discount,
-        tax: totals.tax,
-        total: totals.total,
-        shippingAddress: {
-          name: `${data.firstName} ${data.lastName}`,
-          addressLine1: data.addressLine1,
-          addressLine2: data.addressLine2,
-          city: data.city,
-          state: data.state,
-          postalCode: data.postalCode,
-          country: data.country,
-        },
-        paymentMethod: "Credit Card (Ending in " + data.cardNumber.slice(-4) + ")",
-      });
-
-      setOrderId(order.id);
-      setIsSuccess(true);
-      clearCart();
-      addToast("Order placed successfully!", "success");
-    } catch {
-      addToast("Checkout failed. Please try again.", "error");
+    
+    if (isValid) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleBackStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const processPayment = async (data: CheckoutFormValues) => {
+    const isPaymentValid = await trigger(["cardNumber", "cardExpiry", "cardCvc"]);
+    if (!isPaymentValid) return;
+
+    setIsProcessingPayment(true);
+    
+    // Simulate payment gateway delay (e.g. Razorpay / Stripe)
+    setTimeout(() => {
+      try {
+        const newOrderId = "ORD-" + Math.random().toString(16).slice(2, 10).toUpperCase();
+        
+        addOrder({
+          id: newOrderId,
+          userId: user?.id || "guest",
+          date: new Date().toISOString().split("T")[0],
+          status: "processing",
+          trackingNumber: "TRK" + Math.floor(10000000 + Math.random() * 90000000),
+          items: items.map((item) => ({ ...item })),
+          subtotal: totals.subtotal,
+          discount: totals.discount,
+          tax: totals.tax,
+          total: totals.total,
+          paymentMethod: "Credit Card (Ending in " + (data.cardNumber?.slice(-4) || "0000") + ")",
+          shippingAddress: {
+            name: `${data.firstName} ${data.lastName}`,
+            addressLine1: data.addressLine1,
+            addressLine2: data.addressLine2,
+            city: data.city,
+            state: data.state,
+            postalCode: data.postalCode,
+            country: data.country,
+          }
+        });
+
+        setOrderId(newOrderId);
+        setIsSuccess(true);
+        clearCart();
+        addToast("Payment successful! Order placed.", "success");
+      } catch (err) {
+        addToast("Payment failed. Please try again.", "error");
+      } finally {
+        setIsProcessingPayment(false);
+      }
+    }, 2000);
   };
 
   // If checkout is completed successfully
@@ -127,14 +159,14 @@ export default function CheckoutPage() {
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight">Thank you for your order!</h1>
         <p className="text-base text-muted-foreground leading-relaxed">
-          Your order has been received and is being processed. We will email you shipping updates once dispatch completes.
+          Your payment was successful and your order is being processed. We will email you shipping updates once dispatch completes.
         </p>
         <div className="rounded-xl border border-border p-4 bg-muted/20 text-sm text-left space-y-1.5 font-mono">
           <div><span className="text-muted-foreground">Order ID:</span> <span className="font-bold">{orderId}</span></div>
           <div><span className="text-muted-foreground">Estimated Delivery:</span> 3 - 5 business days</div>
         </div>
         <div className="pt-4 flex flex-col gap-2">
-          <Button onClick={() => router.push("/account")}>
+          <Button onClick={() => router.push("/account/orders")}>
             Track Order In My Account
           </Button>
           <Button variant="outline" onClick={() => router.push("/products")}>
@@ -161,134 +193,176 @@ export default function CheckoutPage() {
   return (
     <div className="space-y-8">
       <Breadcrumb items={[{ label: "Checkout" }]} />
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Secure Checkout</h1>
-        <p className="text-base text-muted-foreground">Complete your order securely. All fields are required unless marked optional.</p>
+      
+      {/* Steps indicator */}
+      <div className="flex items-center justify-center space-x-4 mb-8">
+        {[
+          { num: 1, label: "Contact" },
+          { num: 2, label: "Shipping" },
+          { num: 3, label: "Payment" }
+        ].map((step, index) => (
+          <React.Fragment key={step.num}>
+            <div className={`flex items-center gap-2 ${currentStep >= step.num ? "text-brand" : "text-muted-foreground"}`}>
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${currentStep >= step.num ? "bg-brand text-white" : "bg-muted"}`}>
+                {step.num}
+              </div>
+              <span className="font-semibold hidden sm:inline-block">{step.label}</span>
+            </div>
+            {index < 2 && <div className={`h-1 w-10 sm:w-16 rounded-full ${currentStep > step.num ? "bg-brand" : "bg-muted"}`} />}
+          </React.Fragment>
+        ))}
       </div>
 
-      <form onSubmit={handleSubmit(handleCheckoutSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left Side: Checkout Details Forms */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Left Side: Wizard Forms */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Contact Details Card */}
-          <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 pb-2 border-b border-border">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-sm font-bold">1</span>
-              <h3 className="text-base font-bold text-foreground tracking-tight">Contact Information</h3>
-            </div>
-            <Input
-              type="email"
-              label="Email Address"
-              placeholder="you@example.com"
-              error={errors.email?.message}
-              {...register("email")}
-            />
-          </div>
+          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            {currentStep === 1 && (
+              <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5 animate-in slide-in-from-right-4 fade-in duration-300">
+                <h3 className="text-xl font-bold text-foreground tracking-tight">Contact Information</h3>
+                <Input
+                  type="email"
+                  label="Email Address"
+                  placeholder="you@example.com"
+                  error={errors.email?.message}
+                  {...register("email")}
+                />
+                <Button type="button" onClick={handleNextStep} className="w-full mt-4">
+                  Continue to Shipping
+                </Button>
+              </div>
+            )}
 
-          {/* Shipping Address Card */}
-          <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 pb-2 border-b border-border">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-sm font-bold">2</span>
-              <h3 className="text-base font-bold text-foreground tracking-tight">Shipping Details</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-5">
-              <Input
-                label="First Name"
-                placeholder="Rajesh"
-                error={errors.firstName?.message}
-                {...register("firstName")}
-              />
-              <Input
-                label="Last Name"
-                placeholder="Kumar"
-                error={errors.lastName?.message}
-                {...register("lastName")}
-              />
-            </div>
-            <Input
-              label="Address Line 1"
-              placeholder="Plot 42, MG Road"
-              error={errors.addressLine1?.message}
-              {...register("addressLine1")}
-            />
-            <Input
-              label="Address Line 2 (Optional)"
-              placeholder="Apartment / Floor / Landmark"
-              error={errors.addressLine2?.message}
-              {...register("addressLine2")}
-            />
-            <div className="grid grid-cols-2 gap-5">
-              <Input
-                label="City"
-                placeholder="Mumbai"
-                error={errors.city?.message}
-                {...register("city")}
-              />
-              <Input
-                label="State"
-                placeholder="Maharashtra"
-                error={errors.state?.message}
-                {...register("state")}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-5">
-              <Input
-                label="PIN Code"
-                placeholder="400001"
-                error={errors.postalCode?.message}
-                {...register("postalCode")}
-              />
-              <Select
-                label="Country"
-                options={[
-                  { value: "India", label: "🇮🇳 India" },
-                  { value: "United States", label: "🇺🇸 United States" },
-                  { value: "United Kingdom", label: "🇬🇧 United Kingdom" },
-                  { value: "Australia", label: "🇦🇺 Australia" },
-                  { value: "Canada", label: "🇨🇦 Canada" },
-                  { value: "Singapore", label: "🇸🇬 Singapore" },
-                  { value: "UAE", label: "🇦🇪 UAE" },
-                ]}
-                error={errors.country?.message}
-                {...register("country")}
-              />
-            </div>
-          </div>
+            {currentStep === 2 && (
+              <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5 animate-in slide-in-from-right-4 fade-in duration-300">
+                <h3 className="text-xl font-bold text-foreground tracking-tight">Shipping Details</h3>
+                <div className="grid grid-cols-2 gap-5">
+                  <Input
+                    label="First Name"
+                    placeholder="Rajesh"
+                    error={errors.firstName?.message}
+                    {...register("firstName")}
+                  />
+                  <Input
+                    label="Last Name"
+                    placeholder="Kumar"
+                    error={errors.lastName?.message}
+                    {...register("lastName")}
+                  />
+                </div>
+                <Input
+                  label="Address Line 1"
+                  placeholder="Plot 42, MG Road"
+                  error={errors.addressLine1?.message}
+                  {...register("addressLine1")}
+                />
+                <Input
+                  label="Address Line 2 (Optional)"
+                  placeholder="Apartment / Floor / Landmark"
+                  error={errors.addressLine2?.message}
+                  {...register("addressLine2")}
+                />
+                <div className="grid grid-cols-2 gap-5">
+                  <Input
+                    label="City"
+                    placeholder="Mumbai"
+                    error={errors.city?.message}
+                    {...register("city")}
+                  />
+                  <Input
+                    label="State"
+                    placeholder="Maharashtra"
+                    error={errors.state?.message}
+                    {...register("state")}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-5">
+                  <Input
+                    label="PIN Code"
+                    placeholder="400001"
+                    error={errors.postalCode?.message}
+                    {...register("postalCode")}
+                  />
+                  <Select
+                    label="Country"
+                    options={[
+                      { value: "India", label: "🇮🇳 India" },
+                      { value: "United States", label: "🇺🇸 United States" },
+                    ]}
+                    error={errors.country?.message}
+                    {...register("country")}
+                  />
+                </div>
+                <div className="flex gap-4 mt-4">
+                  <Button type="button" variant="outline" onClick={handleBackStep} className="w-1/3">Back</Button>
+                  <Button type="button" onClick={handleNextStep} className="w-2/3">Continue to Payment</Button>
+                </div>
+              </div>
+            )}
 
-          {/* Mock Payment Details Card */}
-          <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 pb-2 border-b border-border">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white text-sm font-bold">3</span>
-              <h3 className="text-base font-bold text-foreground tracking-tight">Payment Details</h3>
-              <CreditCard className="h-5 w-5 text-muted-foreground ml-auto" />
-            </div>
+            {currentStep === 3 && (
+              <div className="border border-border rounded-2xl bg-card p-7 shadow-sm space-y-5 animate-in slide-in-from-right-4 fade-in duration-300 relative overflow-hidden">
+                {isProcessingPayment && (
+                  <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <div className="h-8 w-8 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="font-semibold text-foreground animate-pulse">Processing secure payment...</p>
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between pb-4 border-b">
+                  <h3 className="text-xl font-bold text-foreground tracking-tight">Secure Payment</h3>
+                  <div className="flex gap-2 opacity-60">
+                    <div className="h-6 w-10 bg-slate-200 dark:bg-slate-700 rounded" />
+                    <div className="h-6 w-10 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </div>
+                </div>
 
-            <Input
-              label="Card Number"
-              placeholder="4111 2222 3333 4444"
-              maxLength={16}
-              error={errors.cardNumber?.message}
-              hint="16-digit number on the front of your card"
-              {...register("cardNumber")}
-            />
+                <div className="bg-muted/30 p-4 rounded-xl space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                    <Lock className="h-4 w-4" />
+                    <span>Payments are processed securely via dummy gateway</span>
+                  </div>
+                  <Input
+                    label="Card Number"
+                    placeholder="4111 2222 3333 4444"
+                    maxLength={16}
+                    error={errors.cardNumber?.message}
+                    {...register("cardNumber")}
+                  />
 
-            <div className="grid grid-cols-2 gap-5">
-              <Input
-                label="Expiry Date"
-                placeholder="MM/YY"
-                maxLength={5}
-                error={errors.cardExpiry?.message}
-                {...register("cardExpiry")}
-              />
-              <Input
-                label="CVC / CVV"
-                placeholder="321"
-                maxLength={4}
-                error={errors.cardCvc?.message}
-                hint="3 or 4 digits on card back"
-                {...register("cardCvc")}
-              />
-            </div>
-          </div>
+                  <div className="grid grid-cols-2 gap-5">
+                    <Input
+                      label="Expiry Date"
+                      placeholder="MM/YY"
+                      maxLength={5}
+                      error={errors.cardExpiry?.message}
+                      {...register("cardExpiry")}
+                    />
+                    <Input
+                      label="CVC / CVV"
+                      placeholder="321"
+                      maxLength={4}
+                      error={errors.cardCvc?.message}
+                      {...register("cardCvc")}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-4">
+                  <Button type="button" variant="outline" onClick={handleBackStep} className="w-1/3" disabled={isProcessingPayment}>Back</Button>
+                  <Button 
+                    type="button" 
+                    variant="brand"
+                    onClick={handleSubmit(processPayment)} 
+                    className="w-2/3 shadow-brand/30 shadow-lg"
+                    isLoading={isProcessingPayment}
+                  >
+                    Pay {formatPrice(totals.total)}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </form>
         </div>
 
         {/* Right Side: Order Review Panel */}
@@ -340,10 +414,6 @@ export default function CheckoutPage() {
                 <span>{formatPrice(totals.total)}</span>
               </div>
             </div>
-
-            <Button type="submit" variant="brand" className="w-full h-12 font-bold text-base rounded-xl" isLoading={isSubmitting}>
-              Place Order · {formatPrice(totals.total)}
-            </Button>
           </div>
 
           <div className="rounded-xl border bg-muted/15 p-4 text-base text-muted-foreground space-y-2 leading-relaxed">
@@ -354,7 +424,7 @@ export default function CheckoutPage() {
             <p>Your payment data is fully encrypted. FISTO uses advanced SSL protection. We never store raw credit card numbers on our servers.</p>
           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

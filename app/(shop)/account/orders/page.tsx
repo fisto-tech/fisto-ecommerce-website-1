@@ -6,6 +6,7 @@ import { formatPrice } from "../../../../lib/utils";
 import { Breadcrumb } from "../../../../components/common/breadcrumb";
 import { Button } from "../../../../components/ui/button";
 import { ArrowLeft, Package, Eye } from "lucide-react";
+import { useOrderStore } from "../../../../store/order";
 
 export default function OrdersPage() {
   const [mounted, setMounted] = React.useState(false);
@@ -16,11 +17,7 @@ export default function OrdersPage() {
 
   if (!mounted) return null;
 
-  const mockOrders = [
-    { id: "ORD-984F7E21", date: "2026-06-24", total: 249, status: "delivered", itemsCount: 1 },
-    { id: "ORD-A109F2B8", date: "2026-07-06", total: 79, status: "processing", itemsCount: 2 },
-    { id: "ORD-C398E192", date: "2026-05-10", total: 119, status: "delivered", itemsCount: 1 },
-  ];
+  const { orders } = useOrderStore();
 
   return (
     <div className="space-y-6">
@@ -57,29 +54,43 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {mockOrders.map((ord) => (
-                <tr key={ord.id} className="hover:bg-muted/10 transition-colors font-medium">
-                  <td className="p-4 font-mono font-bold text-foreground">{ord.id}</td>
-                  <td className="p-4">{ord.date}</td>
-                  <td className="p-4">{ord.itemsCount} {ord.itemsCount === 1 ? "item" : "items"}</td>
-                  <td className="p-4 font-bold">{formatPrice(ord.total)}</td>
-                  <td className="p-4">
-                    <span className={`rounded-full px-2 py-0.5 text-sm font-bold uppercase tracking-wider ${
-                      ord.status === "delivered" ? "bg-emerald-500/10 text-emerald-600" : "bg-blue-500/10 text-blue-600"
-                    }`}>
-                      {ord.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    <Link href={`/account/orders/${ord.id}`}>
-                      <Button variant="ghost" size="sm" className="h-8 py-0 px-2 cursor-pointer">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                    </Link>
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                    You have not placed any orders yet.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                orders.map((ord) => {
+                  const itemsCount = ord.items.reduce((acc, item) => acc + item.quantity, 0);
+                  return (
+                    <tr key={ord.id} className="hover:bg-muted/10 transition-colors font-medium">
+                      <td className="p-4 font-mono font-bold text-foreground">{ord.id}</td>
+                      <td className="p-4">{ord.date}</td>
+                      <td className="p-4">{itemsCount} {itemsCount === 1 ? "item" : "items"}</td>
+                      <td className="p-4 font-bold">{formatPrice(ord.total)}</td>
+                      <td className="p-4">
+                        <span className={`rounded-full px-2 py-0.5 text-sm font-bold uppercase tracking-wider ${
+                          ord.status === "delivered" ? "bg-emerald-500/10 text-emerald-600" : 
+                          ord.status === "refund_requested" ? "bg-amber-500/10 text-amber-600" :
+                          ord.status === "refunded" ? "bg-red-500/10 text-red-600" :
+                          "bg-blue-500/10 text-blue-600"
+                        }`}>
+                          {ord.status.replace("_", " ")}
+                        </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Link href={`/account/orders/${ord.id}`}>
+                          <Button variant="ghost" size="sm" className="h-8 py-0 px-2 cursor-pointer">
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

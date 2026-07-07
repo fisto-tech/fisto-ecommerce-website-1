@@ -96,7 +96,7 @@ export interface Order {
   discount: number;
   tax: number;
   total: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "refund_requested" | "refunded";
   date: string;
   shippingAddress: Address;
   paymentMethod: string;
