@@ -20,7 +20,7 @@ function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = React.useState(searchParams.get("category") || "all");
   const [selectedBrand, setSelectedBrand] = React.useState(searchParams.get("brand") || "all");
   const [selectedRating, setSelectedRating] = React.useState(0);
-  const [maxPrice, setMaxPrice] = React.useState(300);
+  const [maxPrice, setMaxPrice] = React.useState(30000);
   const [sort, setSort] = React.useState<"price-asc" | "price-desc" | "rating" | "latest">("latest");
   const [search, setSearch] = React.useState(searchParams.get("q") || "");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = React.useState(false);
@@ -65,7 +65,7 @@ function ProductsContent() {
     setSelectedCategory("all");
     setSelectedBrand("all");
     setSelectedRating(0);
-    setMaxPrice(300);
+    setMaxPrice(30000);
     setSort("latest");
     setSearch("");
     router.push("/products");
@@ -93,7 +93,7 @@ function ProductsContent() {
             selectedBrand={selectedBrand}
             selectedRating={selectedRating}
             maxPrice={maxPrice}
-            priceLimit={300}
+            priceLimit={30000}
             onCategoryChange={setSelectedCategory}
             onBrandChange={setSelectedBrand}
             onRatingChange={setSelectedRating}
@@ -223,7 +223,7 @@ function ProductsContent() {
           selectedBrand={selectedBrand}
           selectedRating={selectedRating}
           maxPrice={maxPrice}
-          priceLimit={300}
+          priceLimit={30000}
           onCategoryChange={(cat) => {
             setSelectedCategory(cat);
             setIsMobileFiltersOpen(false);
