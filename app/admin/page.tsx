@@ -54,14 +54,16 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">
-            <RefreshCw className="h-4 w-4 mr-1.5" />
-            Refresh
-          </Button>
           <Link href="/admin/products">
             <Button size="sm" variant="outline">
               <Package className="h-4 w-4 mr-1.5" />
-              Manage Products
+              Products
+            </Button>
+          </Link>
+          <Link href="/admin/employees">
+            <Button size="sm" variant="outline">
+              <Users className="h-4 w-4 mr-1.5" />
+              Employees
             </Button>
           </Link>
           <Link href="/admin/products/new">
