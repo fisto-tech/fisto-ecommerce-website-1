@@ -1,5 +1,6 @@
 import { Product, Category, Brand, Review, Order } from "../types";
 import { mockProducts, mockCategories, mockBrands, mockReviews } from "../mock/data";
+import { useProductStore } from "../store/product";
 
 const LATENCY = 300; // Simulated latency in ms
 
@@ -17,7 +18,7 @@ export class ApiService {
     sort?: "price-asc" | "price-desc" | "rating" | "latest";
   }): Promise<Product[]> {
     await delay(LATENCY);
-    let products = [...mockProducts];
+    let products = typeof window !== "undefined" ? useProductStore.getState().products : [...mockProducts];
 
     if (filters) {
       if (filters.category && filters.category !== "all") {
@@ -72,23 +73,24 @@ export class ApiService {
     return products;
   }
 
-  static async getProductBySlug(slug: string): Promise<Product | null> {
+  static async getProductBySlug(slug: string): Promise<Product | undefined> {
     await delay(LATENCY);
-    const product = mockProducts.find((p) => p.slug === slug);
-    return product || null;
+    const products = typeof window !== "undefined" ? useProductStore.getState().products : [...mockProducts];
+    return products.find((p) => p.slug === slug);
   }
 
-  static async getProductById(id: string): Promise<Product | null> {
+  static async getProductById(id: string): Promise<Product | undefined> {
     await delay(LATENCY);
-    const product = mockProducts.find((p) => p.id === id);
-    return product || null;
+    const products = typeof window !== "undefined" ? useProductStore.getState().products : [...mockProducts];
+    return products.find((p) => p.id === id);
   }
 
-  static async getRelatedProducts(productId: string, categoryId: string): Promise<Product[]> {
+  static async getRelatedProducts(productId: string, categoryId: string, limit: number = 4): Promise<Product[]> {
     await delay(LATENCY);
-    return mockProducts
+    const products = typeof window !== "undefined" ? useProductStore.getState().products : [...mockProducts];
+    return products
       .filter((p) => p.categoryId === categoryId && p.id !== productId)
-      .slice(0, 4);
+      .slice(0, limit);
   }
 
   // --- Categories & Brands ---

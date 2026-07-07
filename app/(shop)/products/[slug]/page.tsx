@@ -1,59 +1,41 @@
+"use client";
+
 import * as React from "react";
-import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { useProductStore } from "../../../../store/product";
 import { ApiService } from "../../../../services/api";
 import { ProductDetailClient } from "../../../../components/product/product-detail-client";
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
-}
+export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = React.use(params);
+  const { products } = useProductStore();
+  const [mounted, setMounted] = React.useState(false);
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const product = await ApiService.getProductBySlug(resolvedParams.slug);
+  const [relatedProducts, setRelatedProducts] = React.useState<any[]>([]);
+  const [reviews, setReviews] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const product = products.find((p) => p.slug === resolvedParams.slug);
+
+  React.useEffect(() => {
+    if (product) {
+      ApiService.getRelatedProducts(product.id, product.categoryId).then(setRelatedProducts);
+      ApiService.getReviews(product.id).then(setReviews);
+    }
+  }, [product]);
+
+  if (!mounted) return <div className="min-h-screen bg-background" />;
   
   if (!product) {
-    return {
-      title: "Product Not Found | FISTO",
-    };
+    return (
+      <div className="py-20 text-center">
+        <h1 className="text-2xl font-bold">Product Not Found</h1>
+      </div>
+    );
   }
-
-  const priceVal = product.discountPrice || product.price;
-
-  return {
-    title: `${product.name} | FISTO`,
-    description: product.description,
-    openGraph: {
-      title: `${product.name} | FISTO`,
-      description: product.description,
-      images: [
-        {
-          url: product.images[0],
-          width: 800,
-          height: 800,
-          alt: product.name,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${product.name} | FISTO`,
-      description: product.description,
-      images: [product.images[0]],
-    },
-  };
-}
-
-export default async function ProductDetailPage({ params }: PageProps) {
-  const resolvedParams = await params;
-  const product = await ApiService.getProductBySlug(resolvedParams.slug);
-
-  if (!product) {
-    notFound();
-  }
-
-  const relatedProducts = await ApiService.getRelatedProducts(product.id, product.categoryId);
-  const reviews = await ApiService.getReviews(product.id);
 
   return (
     <ProductDetailClient

@@ -58,10 +58,18 @@ export default function AdminPage() {
             <RefreshCw className="h-4 w-4 mr-1.5" />
             Refresh
           </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-1.5" />
-            Add Product
-          </Button>
+          <Link href="/admin/products">
+            <Button size="sm" variant="outline">
+              <Package className="h-4 w-4 mr-1.5" />
+              Manage Products
+            </Button>
+          </Link>
+          <Link href="/admin/products/new">
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Add Product
+            </Button>
+          </Link>
         </div>
       </div>
 

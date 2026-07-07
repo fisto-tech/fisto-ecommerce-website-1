@@ -1,7 +1,10 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ApiService } from "../../services/api";
+import { useProductStore } from "../../store/product";
 import { ProductCarousel } from "../../components/product/product-carousel";
 import { ProductCard } from "../../components/product/product-card";
 import { FeatureCards } from "../../components/common/feature-cards";
@@ -14,11 +17,19 @@ import { AnimateOnScroll, StaggerContainer, StaggerItem } from "../../components
 import { ArrowRight, ShoppingBag, Sparkles, Zap } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
-export const revalidate = 3600;
+export default function HomePage() {
+  const { products } = useProductStore();
+  const [categories, setCategories] = React.useState<any[]>([]);
+  const [mounted, setMounted] = React.useState(false);
 
-export default async function HomePage() {
-  const products = await ApiService.getProducts();
-  const categories = await ApiService.getCategories();
+  React.useEffect(() => {
+    ApiService.getCategories().then(setCategories);
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className="min-h-screen bg-zinc-950" />;
+  }
 
   const featuredProducts = products.filter((p) => p.isFeatured);
   const bestSellers = products.filter((p) => p.isBestSeller);
