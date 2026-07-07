@@ -262,13 +262,16 @@ export default function CartPage() {
               </span>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { code: "FISTO10", desc: "10% OFF Storewide" },
-                  { code: "SUMMER15", desc: "15% OFF Special" },
-                  { code: "WELCOME5", desc: "5% OFF First Order" }
+                  { code: "FISTO10", desc: "10% OFF Storewide", active: true },
+                  { code: "PREMIUM20", desc: "20% OFF New User", active: true },
+                  { code: "SUMMER15", desc: "15% OFF Special", active: false },
+                  { code: "WELCOME5", desc: "5% OFF First Order", active: false }
                 ].map((promo) => (
                   <button
                     key={promo.code}
+                    disabled={!promo.active}
                     onClick={() => {
+                      if (!promo.active) return;
                       const res = applyDiscount(promo.code);
                       if (res.success) {
                         addToast(res.message, "success");
@@ -277,10 +280,25 @@ export default function CartPage() {
                       }
                     }}
                     type="button"
-                    className="flex flex-col items-start p-2 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 text-left transition-colors cursor-pointer"
+                    className={`flex flex-col items-start p-2 rounded-xl border text-left transition-colors relative ${
+                      promo.active 
+                        ? "border-border bg-muted/20 hover:bg-muted/50 cursor-pointer" 
+                        : "border-destructive/20 bg-destructive/5 opacity-60 cursor-not-allowed"
+                    }`}
                   >
-                    <span className="font-bold text-sm text-foreground">{promo.code}</span>
-                    <span className="text-[10px] text-muted-foreground font-medium">{promo.desc}</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className={`font-bold text-sm ${promo.active ? "text-foreground" : "text-destructive/80 line-through"}`}>
+                        {promo.code}
+                      </span>
+                      {!promo.active && (
+                        <span className="text-[8px] font-bold bg-destructive/10 text-destructive px-1 rounded uppercase tracking-wider">
+                          Expired
+                        </span>
+                      )}
+                    </div>
+                    <span className={`text-[10px] font-medium ${promo.active ? "text-muted-foreground" : "text-destructive/50"}`}>
+                      {promo.desc}
+                    </span>
                   </button>
                 ))}
               </div>

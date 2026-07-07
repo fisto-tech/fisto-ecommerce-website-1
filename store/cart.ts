@@ -76,7 +76,7 @@ export const useCartStore = create<CartState>()(
           set({ discountCode: found.code, discountRate: found.discount });
           return { success: true, message: `Applied ${found.description}` };
         }
-        return { success: false, message: "Invalid promo code" };
+        return { success: false, message: "This coupon code is invalid or has expired." };
       },
 
       clearCart: () => {
