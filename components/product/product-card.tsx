@@ -122,13 +122,13 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Wishlist Heart */}
         <motion.button
           onClick={handleWishlistToggle}
-          className="absolute right-3 top-3 z-10 rounded-full bg-white/90 backdrop-blur-sm p-2 text-foreground shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer"
+          className="absolute right-3 top-3 z-10 rounded-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-2 text-zinc-900 dark:text-white shadow-md hover:bg-white dark:hover:bg-zinc-800 hover:scale-110 transition-all cursor-pointer border border-black/5 dark:border-white/10"
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
           whileTap={{ scale: 0.85 }}
         >
           <Heart
             className={`h-5 w-5 transition-all duration-200 ${
-              inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
+              inWishlist ? "fill-red-500 text-red-500" : "text-zinc-900 dark:text-white"
             }`}
           />
         </motion.button>
