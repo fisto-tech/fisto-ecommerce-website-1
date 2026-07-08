@@ -34,6 +34,20 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && (window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export default function CheckoutPage() {
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
@@ -113,59 +127,112 @@ export default function CheckoutPage() {
   };
 
   const processPayment = async (data: CheckoutFormValues) => {
-    const isPaymentValid = await trigger(["cardNumber", "cardExpiry", "cardCvc"]);
-    if (!isPaymentValid) return;
-
     setIsProcessingPayment(true);
-    
-    // Simulate payment gateway delay (e.g. Razorpay / Stripe)
-    setTimeout(() => {
-      try {
-        const newOrderId = "ORD-" + Math.random().toString(16).slice(2, 10).toUpperCase();
-        
-        addOrder({
-          id: newOrderId,
-          userId: user?.id || "guest",
-          date: new Date().toISOString().split("T")[0],
-          status: "processing",
-          trackingNumber: "TRK" + Math.floor(10000000 + Math.random() * 90000000),
-          items: items.map((item) => ({ ...item })),
-          subtotal: totals.subtotal,
-          discount: totals.discount,
-          tax: totals.tax,
-          total: totals.total,
-          paymentMethod: "Credit Card (Ending in " + (data.cardNumber?.slice(-4) || "0000") + ")",
-          shippingAddress: {
-            name: `${data.firstName} ${data.lastName}`,
-            addressLine1: data.addressLine1,
-            addressLine2: data.addressLine2,
-            city: data.city,
-            state: data.state,
-            postalCode: data.postalCode,
-            country: data.country,
-          }
-        });
 
-        // Reduce product stock
-        items.forEach((item) => {
-          const prod = products.find((p) => p.id === item.product.id);
-          if (prod) {
-            updateProduct(prod.id, {
-              stock: Math.max(0, prod.stock - item.quantity),
-            });
-          }
-        });
-
-        setOrderId(newOrderId);
-        setIsSuccess(true);
-        clearCart();
-        addToast("Payment successful! Order placed.", "success");
-      } catch (err) {
-        addToast("Payment failed. Please try again.", "error");
-      } finally {
+    try {
+      // 1. Load Razorpay SDK Script
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        addToast("Failed to load Razorpay SDK. Please check your internet connection.", "error");
         setIsProcessingPayment(false);
+        return;
       }
-    }, 2000);
+
+      // 2. Create Order on the server-side
+      const response = await fetch("/api/razorpay", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: totals.total }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to initiate Razorpay order.");
+      }
+
+      const orderData = await response.json();
+
+      // 3. Open Razorpay Standard Checkout overlay
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "FISTO Store",
+        description: "Payment for order total",
+        order_id: orderData.id,
+        handler: function (response: any) {
+          // Callback on successful payment
+          try {
+            const newOrderId = "ORD-" + Math.random().toString(16).slice(2, 10).toUpperCase();
+
+            addOrder({
+              id: newOrderId,
+              userId: user?.id || "guest",
+              date: new Date().toISOString().split("T")[0],
+              status: "processing",
+              trackingNumber: "TRK" + Math.floor(10000000 + Math.random() * 90000000),
+              items: items.map((item) => ({ ...item })),
+              subtotal: totals.subtotal,
+              discount: totals.discount,
+              tax: totals.tax,
+              total: totals.total,
+              paymentMethod: `Razorpay (ID: ${response.razorpay_payment_id})`,
+              shippingAddress: {
+                name: `${data.firstName} ${data.lastName}`,
+                addressLine1: data.addressLine1,
+                addressLine2: data.addressLine2,
+                city: data.city,
+                state: data.state,
+                postalCode: data.postalCode,
+                country: data.country,
+              }
+            });
+
+            // Reduce product stock
+            items.forEach((item) => {
+              const prod = products.find((p) => p.id === item.product.id);
+              if (prod) {
+                updateProduct(prod.id, {
+                  stock: Math.max(0, prod.stock - item.quantity),
+                });
+              }
+            });
+
+            setOrderId(newOrderId);
+            setIsSuccess(true);
+            clearCart();
+            addToast("Payment successful! Order placed.", "success");
+          } catch (err) {
+            console.error("Order completion error:", err);
+            addToast("Failed to finalize order in store.", "error");
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+        prefill: {
+          name: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+        },
+        theme: {
+          color: "#4f46e5", // Indigo theme
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+            addToast("Payment window closed.", "info");
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      console.error("Razorpay payment initialization failed:", err);
+      addToast(err.message || "Payment initialization failed. Please try again.", "error");
+      setIsProcessingPayment(false);
+    }
   };
 
   // If checkout is completed successfully
@@ -340,34 +407,18 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 rounded-xl space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                <div className="bg-muted/30 p-5 rounded-xl space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <Lock className="h-4 w-4" />
-                    <span>Payments are processed securely via dummy gateway</span>
+                    <span>Secure Transactions via Razorpay</span>
                   </div>
-                  <Input
-                    label="Card Number"
-                    placeholder="4111 2222 3333 4444"
-                    maxLength={16}
-                    error={errors.cardNumber?.message}
-                    {...register("cardNumber")}
-                  />
-
-                  <div className="grid grid-cols-2 gap-5">
-                    <Input
-                      label="Expiry Date"
-                      placeholder="MM/YY"
-                      maxLength={5}
-                      error={errors.cardExpiry?.message}
-                      {...register("cardExpiry")}
-                    />
-                    <Input
-                      label="CVC / CVV"
-                      placeholder="321"
-                      maxLength={4}
-                      error={errors.cardCvc?.message}
-                      {...register("cardCvc")}
-                    />
+                  <div className="text-sm space-y-2 text-muted-foreground">
+                    <p>
+                      You are about to place an order for <span className="font-bold text-foreground">{formatPrice(totals.total)}</span>.
+                    </p>
+                    <p>
+                      Clicking <strong>Pay {formatPrice(totals.total)}</strong> below will securely open the Razorpay payment gateway overlay where you can pay using Cards, UPI, Netbanking, or mobile Wallets.
+                    </p>
                   </div>
                 </div>
 

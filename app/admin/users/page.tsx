@@ -51,8 +51,9 @@ export default function AdminUsersPage() {
       <div className="border border-border rounded-xl bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-muted/30 border-b border-border/50 text-muted-foreground font-bold tracking-wider uppercase">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-b border-border/50 font-bold tracking-wider uppercase">
               <tr>
+                <th className="p-4 text-center w-16">S.No.</th>
                 <th className="p-4">Customer</th>
                 <th className="p-4">Role</th>
                 <th className="p-4">Status</th>
@@ -63,13 +64,14 @@ export default function AdminUsersPage() {
             <tbody className="divide-y divide-border/50">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-muted-foreground italic">
+                  <td colSpan={6} className="p-8 text-center text-muted-foreground italic">
                     No customers found.
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
+                users.map((user, index) => (
                   <tr key={user.id} className="hover:bg-muted/10 transition-colors">
+                    <td className="p-4 text-center text-muted-foreground">{index + 1}</td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary text-secondary-foreground">

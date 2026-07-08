@@ -5,7 +5,7 @@ import Link from "next/link";
 import { formatPrice } from "../../../../../lib/utils";
 import { Breadcrumb } from "../../../../../components/common/breadcrumb";
 import { Button } from "../../../../../components/ui/button";
-import { ArrowLeft, Package, Clock, Truck, ShieldCheck, AlertCircle } from "lucide-react";
+import { ArrowLeft, Package, Clock, Truck, ShieldCheck, AlertCircle, Download } from "lucide-react";
 import { use } from "react";
 import { useOrderStore } from "../../../../../store/order";
 import { useToastStore } from "../../../../../store/toast";
@@ -53,6 +53,161 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     } else {
       addToast(result.message, "error");
     }
+  };
+
+  const handleDownloadInvoice = () => {
+    if (!order) return;
+
+    const invoiceWindow = window.open("", "_blank");
+    if (!invoiceWindow) {
+      addToast("Please allow popups to download the invoice.", "error");
+      return;
+    }
+
+    const itemsHtml = order.items
+      .map(
+        (item) => `
+      <tr class="border-b border-slate-100 text-slate-700">
+        <td class="py-3 font-semibold">${item.product.name}${
+          item.selectedColor ? ` (${item.selectedColor})` : ""
+        }</td>
+        <td class="py-3 text-center">${item.quantity}</td>
+        <td class="py-3 text-right">${formatPrice(item.product.discountPrice || item.product.price)}</td>
+        <td class="py-3 text-right font-bold">${formatPrice(
+          (item.product.discountPrice || item.product.price) * item.quantity
+        )}</td>
+      </tr>
+    `
+      )
+      .join("");
+
+    invoiceWindow.document.write(`
+      <html>
+      <head>
+        <title>Invoice - ${order.id}</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+          body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+          }
+          @media print {
+            body {
+              background-color: #ffffff;
+              padding: 0;
+            }
+            .no-print {
+              display: none;
+            }
+            .print-border {
+              border: none !important;
+              box-shadow: none !important;
+            }
+          }
+        </style>
+      </head>
+      <body class="p-4 sm:p-10">
+        <div class="max-w-3xl mx-auto border border-slate-200 p-8 sm:p-12 rounded-2xl bg-white shadow-md print-border relative">
+          <!-- Print Button for convenience -->
+          <div class="no-print absolute top-6 right-6">
+            <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow-lg transition-colors cursor-pointer">
+              Print Invoice
+            </button>
+          </div>
+
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-8 mb-8 gap-4">
+            <div>
+              <h1 class="text-3xl font-extrabold tracking-tighter text-slate-900">FISTO<span class="text-indigo-600 font-light">.</span></h1>
+              <p class="text-sm text-slate-500 mt-1">Premium E-Commerce Experience</p>
+            </div>
+            <div class="text-left sm:text-right">
+              <h2 class="text-xl font-bold text-slate-900 uppercase tracking-wider">Invoice</h2>
+              <p class="text-sm text-slate-500 mt-1 font-mono">ID: ${order.id}</p>
+              <p class="text-sm text-slate-500">Date: ${order.date}</p>
+            </div>
+          </div>
+
+          <!-- Details section -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+            <div>
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Billed To</h3>
+              <div class="text-sm text-slate-700 space-y-1">
+                <p class="font-bold text-slate-950">${order.shippingAddress.name}</p>
+                <p>${order.shippingAddress.addressLine1}</p>
+                ${order.shippingAddress.addressLine2 ? `<p>${order.shippingAddress.addressLine2}</p>` : ""}
+                <p>${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}</p>
+                <p>${order.shippingAddress.country}</p>
+              </div>
+            </div>
+            <div class="text-left sm:text-right">
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Payment Details</h3>
+              <div class="text-sm text-slate-700 space-y-1">
+                <p><span class="text-slate-400">Method:</span> ${order.paymentMethod}</p>
+                <p><span class="text-slate-400">Status:</span> <span class="font-semibold text-emerald-600 uppercase text-xs px-2 py-0.5 rounded-full bg-emerald-50">${order.status}</span></p>
+                <p><span class="text-slate-400">Tracking ID:</span> <span class="font-mono text-xs">${order.trackingNumber || "Pending"}</span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <div class="overflow-x-auto mb-8">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-xs">
+                  <th class="pb-3">Product Description</th>
+                  <th class="pb-3 text-center w-16">Qty</th>
+                  <th class="pb-3 text-right w-28">Unit Price</th>
+                  <th class="pb-3 text-right w-28">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total summary -->
+          <div class="flex justify-end">
+            <div class="w-full sm:w-72 space-y-2.5 text-sm text-slate-500">
+              <div class="flex justify-between">
+                <span>Subtotal</span>
+                <span class="font-medium text-slate-900">${formatPrice(order.subtotal)}</span>
+              </div>
+              <div class="flex justify-between text-emerald-600 font-medium">
+                <span>Discount</span>
+                <span>-${formatPrice(order.discount)}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Sales Tax (10%)</span>
+                <span class="font-medium text-slate-900">${formatPrice(order.tax)}</span>
+              </div>
+              <div class="flex justify-between border-t border-slate-200 pt-3 text-base font-bold text-slate-900">
+                <span>Total Due</span>
+                <span>${formatPrice(order.total)}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="border-t border-slate-100 pt-8 mt-12 text-center text-xs text-slate-400 leading-relaxed">
+            <p class="font-bold text-slate-500">Thank you for shopping at FISTO!</p>
+            <p class="mt-1">For refund requests or support, visit fisto-ecommerce-website.app/support or email support@fisto.com</p>
+          </div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    invoiceWindow.document.close();
   };
 
   const getStepStatus = (step: number) => {
@@ -107,14 +262,18 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <p className="text-base text-muted-foreground">Placed on {order.date}</p>
         </div>
         <div className="ml-auto flex gap-3">
+          <Button variant="outline" className="cursor-pointer" onClick={handleDownloadInvoice}>
+            <Download className="h-4 w-4 mr-2" />
+            Download Invoice
+          </Button>
           {(order.status === "pending" || order.status === "processing") && (
-            <Button variant="outline" className="text-red-600 border-red-600/30 hover:bg-red-600/10" onClick={handleCancelOrder}>
+            <Button variant="outline" className="text-red-600 border-red-600/30 hover:bg-red-600/10 cursor-pointer" onClick={handleCancelOrder}>
               <AlertCircle className="h-4 w-4 mr-2" />
               Cancel Order
             </Button>
           )}
           {order.status === "delivered" && (
-            <Button variant="outline" className="text-amber-600 border-amber-600/30 hover:bg-amber-600/10" onClick={handleRefundRequest}>
+            <Button variant="outline" className="text-amber-600 border-amber-600/30 hover:bg-amber-600/10 cursor-pointer" onClick={handleRefundRequest}>
               <AlertCircle className="h-4 w-4 mr-2" />
               Request Refund
             </Button>

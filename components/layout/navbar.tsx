@@ -125,8 +125,8 @@ export function Navbar() {
               onMouseEnter={() => setActiveMegaMenu("shop")}
               onMouseLeave={() => setActiveMegaMenu(null)}
             >
-              <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Shop <ChevronDown className="h-4 w-4" />
+              <button className="flex items-center gap-1.5 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                Shop <ChevronDown className="h-4.5 w-4.5" />
               </button>
 
               <AnimatePresence>
@@ -195,8 +195,8 @@ export function Navbar() {
               onMouseEnter={() => setActiveMegaMenu("brands")}
               onMouseLeave={() => setActiveMegaMenu(null)}
             >
-              <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Brands <ChevronDown className="h-4 w-4" />
+              <button className="flex items-center gap-1.5 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                Brands <ChevronDown className="h-4.5 w-4.5" />
               </button>
 
               <AnimatePresence>
@@ -240,10 +240,10 @@ export function Navbar() {
               </AnimatePresence>
             </div>
 
-            <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/about" className="text-base font-semibold text-muted-foreground hover:text-foreground transition-colors">
               About
             </Link>
-            <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/contact" className="text-base font-semibold text-muted-foreground hover:text-foreground transition-colors">
               Contact
             </Link>
           </nav>
@@ -252,7 +252,7 @@ export function Navbar() {
         {/* Search & Actions */}
         <div className="flex items-center gap-4">
           {/* Search Form */}
-          <div ref={searchRef} className="hidden sm:block relative max-w-xs w-[180px] lg:w-[220px]">
+          <div ref={searchRef} className="hidden sm:block relative max-w-md w-[220px] md:w-[280px] lg:w-[320px] xl:w-[380px]">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <input
                 type="text"
@@ -260,9 +260,9 @@ export function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsFocused(true)}
-                className="w-full h-9 rounded-full border border-input bg-muted/40 pl-9 pr-3 text-sm focus:bg-background focus:ring-1 focus:ring-ring focus:outline-none transition-all"
+                className="w-full h-10.5 rounded-full border border-input bg-muted/40 pl-11 pr-4 text-base focus:bg-background focus:ring-1 focus:ring-ring focus:outline-none transition-all"
               />
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
             </form>
 
             {/* Desktop Suggestions Dropdown */}
@@ -282,8 +282,8 @@ export function Navbar() {
                         className="h-10 w-10 rounded-md object-cover bg-muted shrink-0"
                       />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{product.brandName} • {formatPrice(product.discountPrice || product.price)}</p>
+                        <p className="text-base font-semibold text-foreground truncate">{product.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{product.brandName} • {formatPrice(product.discountPrice || product.price)}</p>
                       </div>
                     </Link>
                   ))}
@@ -295,7 +295,7 @@ export function Navbar() {
                       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
                     }
                   }}
-                  className="w-full text-left p-2.5 text-xs font-bold text-primary hover:bg-secondary transition-colors block border-t"
+                  className="w-full text-left p-3 text-sm font-bold text-primary hover:bg-secondary transition-colors block border-t"
                 >
                   See all results for &ldquo;{searchQuery}&rdquo;
                 </button>

@@ -43,7 +43,7 @@
   
   --radius: 0.75rem;
 
-  --font-geist-sans: var(--font-sans);
+  --font-plus-jakarta-sans: var(--font-sans);
   --font-geist-mono: var(--font-mono);
 }
 
@@ -90,6 +90,9 @@
 }
 
 @theme {
+  --font-sans: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Consolas, monospace;
+
   --color-brand: hsl(var(--brand));
   --color-brand-foreground: hsl(var(--brand-foreground));
   --color-success: hsl(var(--success));

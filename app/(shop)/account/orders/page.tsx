@@ -44,7 +44,8 @@ export default function OrdersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
             <thead>
-              <tr className="border-b bg-muted/20 text-muted-foreground uppercase font-bold tracking-wider">
+              <tr className="border-b bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 uppercase font-bold tracking-wider">
+                <th className="p-4 text-center w-16">S.No.</th>
                 <th className="p-4">Order ID</th>
                 <th className="p-4">Date Placed</th>
                 <th className="p-4">Items Count</th>
@@ -56,15 +57,16 @@ export default function OrdersPage() {
             <tbody className="divide-y">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                  <td colSpan={7} className="p-8 text-center text-muted-foreground italic">
                     You have not placed any orders yet.
                   </td>
                 </tr>
               ) : (
-                orders.map((ord) => {
+                orders.map((ord, index) => {
                   const itemsCount = ord.items.reduce((acc, item) => acc + item.quantity, 0);
                   return (
                     <tr key={ord.id} className="hover:bg-muted/10 transition-colors font-medium">
+                      <td className="p-4 text-center text-muted-foreground">{index + 1}</td>
                       <td className="p-4 font-mono font-bold text-foreground">{ord.id}</td>
                       <td className="p-4">{ord.date}</td>
                       <td className="p-4">{itemsCount} {itemsCount === 1 ? "item" : "items"}</td>

@@ -37,8 +37,9 @@ export default function AdminOrdersPage() {
       <div className="border border-border rounded-xl bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-muted/30 border-b border-border/50 text-muted-foreground font-bold tracking-wider uppercase">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-b border-border/50 font-bold tracking-wider uppercase">
               <tr>
+                <th className="p-4 text-center w-16">S.No.</th>
                 <th className="p-4">Order ID</th>
                 <th className="p-4">Date</th>
                 <th className="p-4">Customer</th>
@@ -51,13 +52,14 @@ export default function AdminOrdersPage() {
             <tbody className="divide-y divide-border/50">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground italic">
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground italic">
                     No orders placed yet.
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                orders.map((order, index) => (
                   <tr key={order.id} className="hover:bg-muted/10 transition-colors">
+                    <td className="p-4 text-center text-muted-foreground">{index + 1}</td>
                     <td className="p-4 font-mono font-bold text-primary">{order.id}</td>
                     <td className="p-4 text-muted-foreground">
                       <div className="flex items-center gap-1.5">

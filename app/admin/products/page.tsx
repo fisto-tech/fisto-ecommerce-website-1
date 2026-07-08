@@ -52,8 +52,9 @@ export default function AdminProductsPage() {
       <div className="border border-border rounded-xl bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-muted/30 border-b border-border/50 text-muted-foreground font-bold tracking-wider uppercase">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-b border-border/50 font-bold tracking-wider uppercase">
               <tr>
+                <th className="p-4 text-center w-16">S.No.</th>
                 <th className="p-4">Image</th>
                 <th className="p-4">Name</th>
                 <th className="p-4">Price</th>
@@ -65,13 +66,14 @@ export default function AdminProductsPage() {
             <tbody className="divide-y divide-border/50">
               {products.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                  <td colSpan={7} className="p-8 text-center text-muted-foreground italic">
                     No products found.
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                products.map((product, index) => (
                   <tr key={product.id} className="hover:bg-muted/10 transition-colors">
+                    <td className="p-4 text-center text-muted-foreground">{index + 1}</td>
                     <td className="p-4">
                       <div className="h-12 w-12 rounded-md border bg-muted overflow-hidden">
                         <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
