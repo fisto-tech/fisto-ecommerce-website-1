@@ -2,6 +2,7 @@ import { Navbar } from "../../components/layout/navbar";
 import { Footer } from "../../components/layout/footer";
 import { CompareBar } from "../../components/product/compare-bar";
 import { QuickViewModal } from "../../components/product/quick-view-modal";
+import { BackToTop } from "../../components/common/back-to-top";
 import { Suspense } from "react";
 
 export default function ShopLayout({
@@ -20,6 +21,7 @@ export default function ShopLayout({
       <Footer />
       <CompareBar />
       <QuickViewModal />
+      <BackToTop />
     </div>
   );
 }
