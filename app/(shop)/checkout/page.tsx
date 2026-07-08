@@ -245,9 +245,14 @@ export default function CheckoutPage() {
                   error={errors.email?.message}
                   {...register("email")}
                 />
-                <Button type="button" onClick={handleNextStep} className="w-full mt-4">
-                  Continue to Shipping
-                </Button>
+                <div className="flex gap-4 mt-4">
+                  <Button type="button" variant="outline" onClick={() => router.push("/cart")} className="w-1/3">
+                    Back to Cart
+                  </Button>
+                  <Button type="button" onClick={handleNextStep} className="w-2/3">
+                    Continue to Shipping
+                  </Button>
+                </div>
               </div>
             )}
 

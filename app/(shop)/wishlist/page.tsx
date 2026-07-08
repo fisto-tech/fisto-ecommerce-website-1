@@ -74,7 +74,7 @@ export default function WishlistPage() {
           const priceVal = product.discountPrice || product.price;
           return (
             <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card hover:shadow-lg transition-all duration-300">
-              <Link href={`/products/${product.slug}`} className="relative aspect-square w-full bg-muted">
+              <Link href={`/products/${product.slug}`} className="block relative aspect-square w-full bg-muted overflow-hidden">
                 <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
               </Link>
               <div className="p-4 flex flex-1 flex-col justify-between space-y-2">

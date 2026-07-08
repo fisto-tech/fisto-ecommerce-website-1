@@ -16,8 +16,17 @@ export default function CartPage() {
   const [mounted, setMounted] = React.useState(false);
   const [promoInput, setPromoInput] = React.useState("");
 
-  const { items, discountCode, discountRate, updateQuantity, removeFromCart, applyDiscount, updateVariant, getTotals } =
-    useCartStore();
+  const {
+    items,
+    discountCode,
+    discountRate,
+    updateQuantity,
+    removeFromCart,
+    applyDiscount,
+    removeDiscount,
+    updateVariant,
+    getTotals
+  } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
 
@@ -294,9 +303,21 @@ export default function CartPage() {
             </form>
 
             {discountRate > 0 && (
-              <p className="text-sm text-emerald-600 font-semibold uppercase tracking-wider">
-                ✓ Coupon Code active: {Math.round(discountRate * 100)}% Discount Applied.
-              </p>
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                <span className="text-xs font-semibold uppercase tracking-wider">
+                  ✓ Active: {discountCode} ({Math.round(discountRate * 100)}% OFF)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeDiscount();
+                    addToast("Coupon code removed.", "info");
+                  }}
+                  className="text-xs font-bold text-destructive hover:underline cursor-pointer"
+                >
+                  Remove
+                </button>
+              </div>
             )}
 
             <div className="pt-3 border-t border-border/50 space-y-2">

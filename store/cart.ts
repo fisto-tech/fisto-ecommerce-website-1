@@ -11,6 +11,7 @@ interface CartState {
   removeFromCart: (productId: string, selectedColor?: string, selectedSize?: string) => void;
   updateQuantity: (productId: string, quantity: number, selectedColor?: string, selectedSize?: string) => void;
   applyDiscount: (code: string) => { success: boolean; message: string };
+  removeDiscount: () => void;
   updateVariant: (productId: string, oldColor?: string, oldSize?: string, newColor?: string, newSize?: string) => void;
   clearCart: () => void;
   getTotals: () => { subtotal: number; discount: number; tax: number; total: number };
@@ -78,6 +79,10 @@ export const useCartStore = create<CartState>()(
           return { success: true, message: `Applied ${found.description}` };
         }
         return { success: false, message: "This coupon code is invalid or has expired." };
+      },
+
+      removeDiscount: () => {
+        set({ discountCode: "", discountRate: 0 });
       },
 
       updateVariant: (productId, oldColor, oldSize, newColor, newSize) => {
